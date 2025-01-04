@@ -1,4 +1,4 @@
-package com.example.fitnesstracker;
+package com.example.fitnesstracker.presentation;
 
 import android.os.Bundle;
 
@@ -8,6 +8,12 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.example.fitnesstracker.R;
+import com.example.fitnesstracker.presentation.auth.AuthFragment;
+
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class MainActivity extends AppCompatActivity {
 
     @Override
@@ -20,5 +26,10 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.main_container, new AuthFragment())
+                .commit();
     }
 }

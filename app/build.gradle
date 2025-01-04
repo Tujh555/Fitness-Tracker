@@ -1,10 +1,15 @@
 plugins {
     alias(libs.plugins.android.application)
+    id 'dagger.hilt.android.plugin'
+}
+
+tasks.withType(JavaCompile) {
+    options.compilerArgs += ["--enable-preview"]
 }
 
 android {
     namespace 'com.example.fitnesstracker'
-    compileSdk 34
+    compileSdk 35
 
     defaultConfig {
         applicationId "com.example.fitnesstracker"
@@ -23,17 +28,40 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    buildFeatures {
+        viewBinding = true
     }
 }
 
 dependencies {
-
     implementation libs.appcompat
     implementation libs.material
     implementation libs.activity
     implementation libs.constraintlayout
+
+    implementation libs.hilt.android
+    annotationProcessor "com.google.dagger:hilt-compiler:$hilt_version"
+
+    implementation libs.room.runtime
+    annotationProcessor "androidx.room:room-compiler:$room_version"
+    implementation libs.room.rxjava3
+
+    implementation libs.retrofit
+    implementation libs.converter.gson
+
+    implementation libs.rxjava
+    implementation libs.rxandroid
+
+    implementation libs.okhttp
+    implementation libs.logging.interceptor
+    implementation libs.rxjava3.retrofit.adapter
+    implementation libs.gson
+
+    implementation libs.lifecycle.reactivestreams
+
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
