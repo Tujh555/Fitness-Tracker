@@ -59,8 +59,10 @@ dependencies {
     implementation libs.logging.interceptor
     implementation libs.rxjava3.retrofit.adapter
     implementation libs.gson
+    implementation libs.cicerone
 
     implementation libs.lifecycle.reactivestreams
+    implementation libs.security.crypto
 
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit

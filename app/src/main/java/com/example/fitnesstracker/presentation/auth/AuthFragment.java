@@ -21,6 +21,9 @@ import com.example.fitnesstracker.presentation.auth.error.NotExistedUser;
 import com.example.fitnesstracker.presentation.auth.error.Unknown;
 import com.example.fitnesstracker.presentation.auth.state.AuthScreenState;
 import com.example.fitnesstracker.presentation.basic.fragment.BaseFragment;
+import com.github.terrakok.cicerone.androidx.FragmentScreen;
+
+import org.jetbrains.annotations.Contract;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -55,7 +58,7 @@ public class AuthFragment extends BaseFragment<AuthScreenState, AuthScreenAction
     }
 
     private void updateLogin(String login) {
-        withBinding((binding) -> {
+        withBinding(binding -> {
             if (!binding.etLogin.getText().toString().equals(login)) {
                 binding.etLogin.setText(login);
             }
@@ -63,7 +66,7 @@ public class AuthFragment extends BaseFragment<AuthScreenState, AuthScreenAction
     }
 
     private void updatePassword(String password) {
-        withBinding((binding) -> {
+        withBinding(binding -> {
             if (!binding.etPassword.getText().toString().equals(password)) {
                 binding.etPassword.setText(password);
             }
@@ -71,7 +74,7 @@ public class AuthFragment extends BaseFragment<AuthScreenState, AuthScreenAction
     }
 
     private void updateError(@Nullable AuthError error) {
-        withBinding((binding) -> {
+        withBinding(binding -> {
             final var tvError = binding.tvError;
 
             if (error instanceof InvalidCredentials) {
@@ -87,18 +90,26 @@ public class AuthFragment extends BaseFragment<AuthScreenState, AuthScreenAction
     }
 
     private void onSingInClick(View v) {
-        getViewModel().onAction(new SignIn());
+        onAction(new SignIn());
     }
 
     private void onSignUpClick(View v) {
-        getViewModel().onAction(new SignUp());
+        onAction(new SignUp());
     }
 
     private void onLoginInput(String text) {
-        getViewModel().onAction(new LoginInput(text));
+        onAction(new LoginInput(text));
     }
 
     private void onPasswordInput(String text) {
-        getViewModel().onAction(new PasswordInput(text));
+        onAction(new PasswordInput(text));
+    }
+
+    @NonNull
+    @Contract(" -> new")
+    public static FragmentScreen getScreen() {
+        return FragmentScreen
+                .Companion
+                .invoke(null, true, (f) -> new AuthFragment());
     }
 }

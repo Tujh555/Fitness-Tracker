@@ -1,6 +1,7 @@
 package com.example.fitnesstracker.data.auth;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.example.fitnesstracker.domain.User;
 import com.example.fitnesstracker.domain.auth.AuthRepository;
@@ -29,7 +30,12 @@ public class AuthRepositoryImpl implements AuthRepository {
     }
 
     @Override
-    public Single<User> signUp(@NonNull String login, @NonNull String password) {
+    public Single<User> signUp(
+            @NonNull String login,
+            @NonNull String password,
+            @Nullable Integer age,
+            @Nullable String name
+    ) {
         return Single.error(InvalidCredentialsException::new);
     }
 }

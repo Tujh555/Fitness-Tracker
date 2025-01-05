@@ -12,6 +12,4 @@ public interface BaseViewModel<S, A> {
     Flowable<S> observeState();
 
     void onAction(@NonNull A action);
-
-    void setFragmentManager(@Nullable FragmentManager manager);
 }

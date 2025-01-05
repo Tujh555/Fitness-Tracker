@@ -1,7 +1,6 @@
 package com.example.fitnesstracker.presentation.basic.fragment;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,13 +12,18 @@ import androidx.viewbinding.ViewBinding;
 
 import java.util.function.Consumer;
 
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.disposables.Disposable;
 
 public abstract class BaseFragment<S, A, B extends ViewBinding, V extends BaseViewModel<S, A>> extends Fragment {
     private @Nullable B _binding = null;
     private @Nullable V _viewModel = null;
     private @Nullable Disposable stateDisposable = null;
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+    }
 
     @NonNull
     @Override
@@ -35,8 +39,6 @@ public abstract class BaseFragment<S, A, B extends ViewBinding, V extends BaseVi
                 .observeState()
                 .subscribe(this::onStateChanged, e -> {});
 
-        viewModel.setFragmentManager(getParentFragmentManager());
-
         return binding.getRoot();
     }
 
@@ -47,7 +49,6 @@ public abstract class BaseFragment<S, A, B extends ViewBinding, V extends BaseVi
             stateDisposable = null;
         }
         _binding = null;
-        getViewModel().setFragmentManager(null);
         super.onDestroyView();
     }
 
@@ -73,4 +74,8 @@ public abstract class BaseFragment<S, A, B extends ViewBinding, V extends BaseVi
     protected abstract @NonNull V createViewModel();
 
     protected void onStateChanged(@NonNull S state) {}
+
+    protected final void onAction(@NonNull A action) {
+        getViewModel().onAction(action);
+    }
 }

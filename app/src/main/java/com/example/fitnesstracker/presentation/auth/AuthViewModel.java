@@ -2,7 +2,6 @@ package com.example.fitnesstracker.presentation.auth;
 
 import androidx.annotation.NonNull;
 
-import com.example.fitnesstracker.R;
 import com.example.fitnesstracker.domain.User;
 import com.example.fitnesstracker.domain.auth.AuthRepository;
 import com.example.fitnesstracker.domain.auth.error.InvalidCredentialsException;
@@ -20,6 +19,7 @@ import com.example.fitnesstracker.presentation.auth.state.AuthScreenState;
 import com.example.fitnesstracker.presentation.basic.fragment.disposable.DisposableViewModel;
 import com.example.fitnesstracker.presentation.main.MainPageFragment;
 import com.example.fitnesstracker.presentation.singup.SingUpFragment;
+import com.github.terrakok.cicerone.Router;
 
 import javax.inject.Inject;
 
@@ -30,11 +30,13 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 @HiltViewModel
 public class AuthViewModel extends DisposableViewModel<AuthScreenState, AuthScreenAction> {
     private final AuthRepository repository;
+    private final Router router;
 
     @Inject
-    public AuthViewModel(AuthRepository authRepository) {
+    public AuthViewModel(AuthRepository authRepository, Router appRouter) {
         super(new AuthScreenState("", "", null));
         repository = authRepository;
+        router = appRouter;
         checkAlreadyAuthorized();
     }
 
@@ -52,15 +54,15 @@ public class AuthViewModel extends DisposableViewModel<AuthScreenState, AuthScre
     }
 
     private void loginInput(String login) {
-        updateState((state) -> new AuthScreenState(login, state.password(), state.error()));
+        updateState(state -> new AuthScreenState(login, state.password(), state.error()));
     }
 
     private void passwordInput(String password) {
-        updateState((state) -> new AuthScreenState(state.login(), password, state.error()));
+        updateState(state -> new AuthScreenState(state.login(), password, state.error()));
     }
 
     private void singIn() {
-        final var singInResult = withState((state) -> repository.signIn(state.login(), state.password()));
+        final var singInResult = withState(state -> repository.signIn(state.login(), state.password()));
         if (singInResult == null) {
             return;
         }
@@ -75,12 +77,7 @@ public class AuthViewModel extends DisposableViewModel<AuthScreenState, AuthScre
     }
 
     private void navigateToMainPage(@NonNull User user) {
-        navigate((fragmentManager) ->
-                fragmentManager
-                        .beginTransaction()
-                        .replace(R.id.main_container, new MainPageFragment())
-                        .commit()
-        );
+        router.navigateTo(MainPageFragment.getScreen(user));
     }
 
     private void processSignInError(Throwable throwable) {
@@ -94,16 +91,11 @@ public class AuthViewModel extends DisposableViewModel<AuthScreenState, AuthScre
             error = new Unknown();
         }
 
-        updateState((state) -> new AuthScreenState("", "", error));
+        updateState(state -> new AuthScreenState("", "", error));
     }
 
     private void signUp() {
-        navigate((fragmentManager) ->
-                fragmentManager
-                        .beginTransaction()
-                        .replace(R.id.main_container, new SingUpFragment())
-                        .commit()
-        );
+        router.navigateTo(SingUpFragment.getScreen());
     }
 
     private void checkAlreadyAuthorized() {
