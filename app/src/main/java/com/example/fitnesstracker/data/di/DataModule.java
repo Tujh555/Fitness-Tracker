@@ -1,6 +1,10 @@
 package com.example.fitnesstracker.data.di;
 
+import com.example.fitnesstracker.data.Storage;
 import com.example.fitnesstracker.data.auth.AuthRepositoryImpl;
+import com.example.fitnesstracker.data.auth.TokenSecureStorage;
+import com.example.fitnesstracker.data.auth.UserStorage;
+import com.example.fitnesstracker.data.rest.dto.UserDto;
 import com.example.fitnesstracker.domain.auth.AuthRepository;
 
 import dagger.Binds;
@@ -13,4 +17,10 @@ import dagger.hilt.components.SingletonComponent;
 interface DataModule {
     @Binds
     AuthRepository bind(AuthRepositoryImpl impl);
+
+    @Binds
+    Storage<UserDto> bindUserStorage(UserStorage storage);
+
+    @Binds
+    Storage<String> bindAuthTokenStorage(TokenSecureStorage storage);
 }

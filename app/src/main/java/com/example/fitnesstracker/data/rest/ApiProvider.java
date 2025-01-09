@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 
 import com.example.fitnesstracker.data.rest.auth.AuthApi;
 import com.example.fitnesstracker.data.rest.auth.interceptor.AuthTokenInterceptor;
+import com.example.fitnesstracker.data.rest.workout.WorkoutApi;
 
 import javax.inject.Singleton;
 
@@ -38,7 +39,13 @@ public class ApiProvider {
                 .build();
     }
 
+    @Provides
     public AuthApi provideAuthApi(@NonNull Retrofit retrofit) {
         return retrofit.create(AuthApi.class);
+    }
+
+    @Provides
+    public WorkoutApi provideWorkoutApi(@NonNull Retrofit retrofit) {
+        return retrofit.create(WorkoutApi.class);
     }
 }
