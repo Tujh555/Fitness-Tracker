@@ -14,9 +14,7 @@ import com.example.fitnesstracker.data.database.entities.WorkoutWithExercises;
 import com.example.fitnesstracker.domain.workout.WorkoutRepository;
 import com.example.fitnesstracker.domain.workout.models.Workout;
 
-import java.time.Instant;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
 
@@ -37,12 +35,11 @@ public class WorkoutRepositoryImpl implements WorkoutRepository {
         this.workoutsMediator = workoutsMediator;
     }
 
-
     @NonNull
     @Override
     public Flowable<PagingData<Workout>> observeWorkouts() {
         final var config = new PagingConfig(20, 5, true, 20);
-        final var pager = new Pager<>(config, Instant.now(), workoutsMediator, workoutDao::selectAll);
+        final var pager = new Pager<>(config, 1, workoutsMediator, workoutDao::selectAll);
         final var executor = new Executor() {
             @Override
             public void execute(Runnable runnable) {

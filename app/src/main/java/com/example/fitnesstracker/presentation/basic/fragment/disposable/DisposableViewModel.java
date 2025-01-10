@@ -32,11 +32,11 @@ public abstract class DisposableViewModel<S, A> extends ViewModel implements Bas
     }
 
     protected final void onSubscribe(@NonNull SingleFactory factory) {
-        final var disposable = factory
-                .create()
-                .subscribe((v) -> {}, (e) -> {});
+        factory.create().subscribe((v) -> {}, (e) -> {}, disposables);
+    }
 
-        disposables.add(disposable);
+    protected final void onSubscribe(@NonNull FlowableFactory factory) {
+        factory.create().subscribe((v) -> {}, (t) -> {}, () -> {}, disposables);
     }
 
     @Override

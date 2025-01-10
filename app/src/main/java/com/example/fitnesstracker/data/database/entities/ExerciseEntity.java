@@ -23,31 +23,28 @@ import java.util.List;
 public class ExerciseEntity {
         @PrimaryKey
         @NonNull
-        public final String id;
-
-        @NonNull
+        public String id;
         @ColumnInfo(name = "workout_id")
-        public final String workoutId;
-
-        @NonNull
-        public final String title;
-
-        @Nullable
-        public final String describingPhoto;
+        public String workoutId;
+        public String title;
+        public String describingPhoto;
+        public List<Approach> approaches;
 
     public ExerciseEntity(
             @NonNull String id,
             @NonNull String workoutId,
             @NonNull String title,
-            @Nullable String describingPhoto
+            @Nullable String describingPhoto,
+            @NonNull List<Approach> approaches
     ) {
         this.id = id;
         this.workoutId = workoutId;
         this.title = title;
         this.describingPhoto = describingPhoto;
+        this.approaches = approaches;
     }
 
-    public @NonNull Exercise toDomain(@NonNull List<Approach> approaches) {
+    public @NonNull Exercise toDomain() {
         return new Exercise(id, title, describingPhoto, approaches);
     }
 
@@ -59,7 +56,8 @@ public class ExerciseEntity {
                 exercise.id(),
                 workoutId,
                 exercise.title(),
-                exercise.describingPhoto()
+                exercise.describingPhoto(),
+                exercise.approaches()
         );
     }
 }

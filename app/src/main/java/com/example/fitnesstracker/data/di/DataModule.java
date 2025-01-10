@@ -5,7 +5,9 @@ import com.example.fitnesstracker.data.auth.AuthRepositoryImpl;
 import com.example.fitnesstracker.data.auth.TokenSecureStorage;
 import com.example.fitnesstracker.data.auth.UserStorage;
 import com.example.fitnesstracker.data.rest.dto.UserDto;
+import com.example.fitnesstracker.data.workout.WorkoutRepositoryImpl;
 import com.example.fitnesstracker.domain.auth.AuthRepository;
+import com.example.fitnesstracker.domain.workout.WorkoutRepository;
 
 import dagger.Binds;
 import dagger.Module;
@@ -23,4 +25,7 @@ interface DataModule {
 
     @Binds
     Storage<String> bindAuthTokenStorage(TokenSecureStorage storage);
+
+    @Binds
+    WorkoutRepository bindWorkout(WorkoutRepositoryImpl impl);
 }

@@ -11,11 +11,11 @@ import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public record WorkoutResponse(
+public record WorkoutDto(
         @SerializedName("id") String id,
         @SerializedName("title") String title,
         @SerializedName("date") String date,
-        @SerializedName("exercises") List<ExerciseResponse> exercises
+        @SerializedName("exercises") List<ExerciseDto> exercises
 ) {
     public @NonNull Workout toDomain() {
         final var exerciseModels = exercises
@@ -26,7 +26,7 @@ public record WorkoutResponse(
                         e.describingPhoto(),
                         e.approaches()
                                 .stream()
-                                .map(a -> new Approach(a.id(), a.repetitions(), a.weight()))
+                                .map(a -> new Approach(a.repetitions(), a.weight()))
                                 .collect(Collectors.toList())
                         )
                 )
@@ -36,17 +36,3 @@ public record WorkoutResponse(
     }
 }
 
-record ExerciseResponse(
-        @SerializedName("id") String id,
-        @SerializedName("title") String title,
-        @SerializedName("describingPhoto") String describingPhoto,
-        @SerializedName("approaches") List<ApproachResponse> approaches
-) {
-}
-
-record ApproachResponse(
-        @SerializedName("id") String id,
-        @SerializedName("repetitions") int repetitions,
-        @SerializedName("weight") int weight
-) {
-}

@@ -1,24 +1,24 @@
 package com.example.fitnesstracker.data.workout;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.paging.ExperimentalPagingApi;
 import androidx.paging.LoadType;
 import androidx.paging.PagingState;
 import androidx.paging.rxjava3.RxRemoteMediator;
 
-import com.example.fitnesstracker.data.database.WorkoutDao;
 import com.example.fitnesstracker.data.database.WorkoutDatabase;
-import com.example.fitnesstracker.data.database.entities.ApproachEntity;
 import com.example.fitnesstracker.data.database.entities.ExerciseEntity;
+import com.example.fitnesstracker.data.database.entities.RemoteKeys;
 import com.example.fitnesstracker.data.database.entities.WorkoutEntity;
 import com.example.fitnesstracker.data.database.entities.WorkoutWithExercises;
-import com.example.fitnesstracker.data.rest.dto.WorkoutResponse;
+import com.example.fitnesstracker.data.rest.dto.WorkoutDto;
 import com.example.fitnesstracker.data.rest.workout.WorkoutApi;
 import com.example.fitnesstracker.domain.workout.models.Workout;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -28,21 +28,18 @@ import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
 @ExperimentalPagingApi
-public class WorkoutsMediator extends RxRemoteMediator<Instant, WorkoutWithExercises> {
+public class WorkoutsMediator extends RxRemoteMediator<Integer, WorkoutWithExercises> {
     private final @NonNull WorkoutApi workoutApi;
-    private final @NonNull WorkoutDao workoutDao;
     private final @NonNull WorkoutDatabase database;
     private static final int pageSize = 20;
-    private static final Instant emptyDate = Instant.MIN;
+    private static final int invalidPage = -1;
 
     @Inject
     public WorkoutsMediator(
             @NonNull WorkoutApi workoutApi,
-            @NonNull WorkoutDao workoutDao,
             @NonNull WorkoutDatabase database
     ) {
         this.workoutApi = workoutApi;
-        this.workoutDao = workoutDao;
         this.database = database;
     }
 
@@ -51,102 +48,140 @@ public class WorkoutsMediator extends RxRemoteMediator<Instant, WorkoutWithExerc
     @Override
     public Single<MediatorResult> loadSingle(
             @NonNull LoadType loadType,
-            @NonNull PagingState<Instant, WorkoutWithExercises> pagingState
+            @NonNull PagingState<Integer, WorkoutWithExercises> pagingState
     ) {
         return Single
                 .just(loadType)
                 .subscribeOn(Schedulers.io())
-                .map(type -> keyForType(loadType, pagingState))
-                .flatMap(time -> fetch(time, loadType))
+                .map(type -> pageFor(loadType, pagingState))
+                .flatMap(page -> fetch(page, loadType))
                 .onErrorReturn(MediatorResult.Error::new);
     }
 
-    private @NonNull Instant keyForType(
+    private @NonNull Integer pageFor(
             @NonNull LoadType type,
-            @NonNull PagingState<Instant, WorkoutWithExercises> pagingState
+            @NonNull PagingState<Integer, WorkoutWithExercises> pagingState
     ) {
         switch (type) {
             case REFRESH -> {
-                return closestKey(pagingState);
+                final var keys = closestKey(pagingState);
+                if (keys == null || keys.next == null) {
+                    return 1;
+                }
+                return keys.next - 1;
             }
             case PREPEND -> {
-                return firstItemKey(pagingState);
+                final var keys = firstItemKey(pagingState);
+
+                if (keys == null || keys.prev == null) {
+                    throw new IllegalStateException();
+                }
+
+                return keys.prev;
             }
             case APPEND -> {
-                return lastItemKey(pagingState);
+                final var keys = lastItemKey(pagingState);
+
+                if (keys == null || keys.next == null) {
+                    throw new IllegalStateException();
+                }
+
+                return keys.next;
             }
         }
 
-        return emptyDate;
+        return invalidPage;
     }
 
-    private @NonNull Single<MediatorResult> fetch(@NonNull Instant time, @NonNull LoadType type) {
-        if (time == emptyDate) {
+    private @NonNull Single<MediatorResult> fetch(@NonNull Integer page, @NonNull LoadType type) {
+        if (page == invalidPage) {
             return Single.just(new MediatorResult.Success(true));
         }
 
-        final Single<List<WorkoutResponse>> single;
+        final var single = workoutApi.getWorkouts(page, pageSize);
 
-        switch (type) {
-            case REFRESH, PREPEND ->
-                    single = workoutApi.getWorkoutsAfter(time.toString(), pageSize);
-
-            case APPEND ->
-                    single = workoutApi.getWorkoutsBefore(time.toString(), pageSize);
-
-            default -> single = Single.just(new ArrayList<>());
-        }
-
-        return single.map(workoutResponses -> {
-            final var workouts = workoutResponses
+        return single.map(workoutResponse -> {
+            final var workouts = workoutResponse
+                    .workouts()
                     .stream()
-                    .map(WorkoutResponse::toDomain)
+                    .map(WorkoutDto::toDomain)
                     .collect(Collectors.toList());
 
-            insertToDb(workouts, type);
+            final boolean lastPage = Objects.equals(
+                    workoutResponse.page(),
+                    workoutResponse.totalPages()
+            );
 
-            return new MediatorResult.Success(workouts.size() < pageSize);
+            insertToDb(page, workouts, type, lastPage);
+
+            return new MediatorResult.Success(lastPage);
         });
     }
 
-    private void insertToDb(@NonNull List<Workout> workouts, @NonNull LoadType loadType) {
+    private void insertToDb(
+            int page,
+            @NonNull List<Workout> workouts,
+            @NonNull LoadType loadType,
+            boolean lastPage
+    ) {
+        final var workoutDao = database.workoutDao();
+        final var keysDao = database.remoteKeysDao();
         database.runInTransaction(() -> {
             final Completable clearCompletable;
 
             if (loadType.equals(LoadType.REFRESH)) {
-                clearCompletable = workoutDao.clear();
+                clearCompletable = workoutDao.clear().andThen(keysDao.clear());
             } else {
                 clearCompletable = Completable.complete();
             }
 
             final var workoutEntities = new ArrayList<WorkoutEntity>(workouts.size());
             final var exerciseEntities = new ArrayList<ExerciseEntity>(workouts.size());
-            final var approachEntities = new ArrayList<ApproachEntity>(workouts.size());
 
             workouts.forEach(workout -> {
                 workoutEntities.add(WorkoutEntity.toDb(workout));
 
-                workout.exercises().forEach(exercise -> {
-                    exerciseEntities.add(ExerciseEntity.toDb(workout.id(), exercise));
+                workout.exercises().forEach(exercise ->
+                        exerciseEntities.add(ExerciseEntity.toDb(workout.id(), exercise))
+                );
+            });
 
-                    exercise.approaches().forEach(approach ->
-                            approachEntities.add(ApproachEntity.toDb(exercise.id(), approach))
-                    );
-                });
+            Integer prevKey;
+            Integer nextKey;
+
+            if (page != 1) {
+                prevKey = page - 1;
+            } else {
+                prevKey = null;
+            }
+
+            if (!lastPage) {
+                nextKey = page + 1;
+            } else {
+                nextKey = null;
+            }
+
+            final var keysInsertCompletable = Completable.fromAction(() -> {
+                final var keys = workouts
+                        .stream()
+                        .map(workout -> new RemoteKeys(workout.id(), prevKey, nextKey))
+                        .collect(Collectors.toList());
+
+                keysDao.insert(keys);
             });
 
             clearCompletable
+                    .andThen(keysInsertCompletable)
                     .andThen(workoutDao.insertWorkouts(workoutEntities))
                     .andThen(workoutDao.insertExercises(exerciseEntities))
-                    .andThen(workoutDao.insertApproach(approachEntities))
                     .subscribeOn(Schedulers.io())
                     .observeOn(Schedulers.io())
                     .blockingAwait();
         });
     }
 
-    private @NonNull Instant firstItemKey(
-            @NonNull PagingState<Instant, WorkoutWithExercises> pagingState
+    private @Nullable RemoteKeys firstItemKey(
+            @NonNull PagingState<Integer, WorkoutWithExercises> pagingState
     ) {
         final var firstPage = pagingState
                 .getPages()
@@ -155,36 +190,45 @@ public class WorkoutsMediator extends RxRemoteMediator<Instant, WorkoutWithExerc
                 .findFirst();
 
         return firstPage
-                .map(workouts -> workouts.getData().get(0).workout.date)
-                .orElse(emptyDate);
+                .map(workouts -> {
+                    final var id = workouts.getData().get(0).workout.id;
+                    return database.remoteKeysDao().resolve(id);
+                })
+                .orElse(null);
     }
 
-    private @NonNull Instant lastItemKey(
-            @NonNull PagingState<Instant, WorkoutWithExercises> pagingState
+    private @Nullable RemoteKeys lastItemKey(
+            @NonNull PagingState<Integer, WorkoutWithExercises> pagingState
     ) {
         for (int i = pagingState.getPages().size() - 1; i >= 0; i--) {
             final var page = pagingState.getPages().get(i);
             if (!page.getData().isEmpty()) {
-                return page.getData().get(page.getData().size() - 1).workout.date;
+                final var workoutId = page
+                        .getData()
+                        .get(page.getData().size() - 1)
+                        .workout.id;
+
+                return database.remoteKeysDao().resolve(workoutId);
             }
         }
 
-        return emptyDate;
+        return null;
     }
 
-    private @NonNull Instant closestKey(
-            @NonNull PagingState<Instant, WorkoutWithExercises> pagingState
+    private @Nullable RemoteKeys closestKey(
+            @NonNull PagingState<Integer, WorkoutWithExercises> pagingState
     ) {
         final var anchorPosition = pagingState.getAnchorPosition();
 
         if (anchorPosition == null) {
-            return emptyDate;
+            return null;
         }
         final var closest = pagingState.closestItemToPosition(anchorPosition);
         if (closest == null) {
-            return emptyDate;
+            return null;
         }
 
-        return closest.workout.date;
+
+        return database.remoteKeysDao().resolve(closest.workout.id);
     }
 }

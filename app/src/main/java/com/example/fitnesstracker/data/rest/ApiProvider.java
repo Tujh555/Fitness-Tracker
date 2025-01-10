@@ -32,7 +32,7 @@ public class ApiProvider {
                 .build();
 
         return new Retrofit.Builder()
-                .baseUrl("TODO")
+                .baseUrl("https://dion.vc")
                 .addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
                 .client(client)
