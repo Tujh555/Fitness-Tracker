@@ -5,10 +5,12 @@ import android.content.SharedPreferences;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.example.fitnesstracker.data.Storage;
+import com.example.fitnesstracker.data.storage.Storage;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
+import io.reactivex.rxjava3.core.Flowable;
 
 @Singleton
 public class TokenSecureStorage implements Storage<String> {

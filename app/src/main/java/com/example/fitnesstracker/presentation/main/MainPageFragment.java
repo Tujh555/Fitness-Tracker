@@ -58,7 +58,7 @@ public class MainPageFragment extends BaseFragment<MainFragmentState, MainPageSc
 
     @NonNull
     @Contract("_ -> new")
-    public static FragmentScreen getScreen(User user) {
+    public static FragmentScreen getScreen() {
         return FragmentScreen.Companion.invoke(
                 null,
                 true,

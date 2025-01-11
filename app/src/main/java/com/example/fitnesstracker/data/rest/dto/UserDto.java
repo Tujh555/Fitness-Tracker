@@ -31,4 +31,16 @@ public record UserDto(
                 Objects.requireNonNullElse(target(), "")
         );
     }
+
+    @NonNull
+    public static UserDto of(@NonNull User user) {
+        return new UserDto(
+                user.id(),
+                user.name(),
+                user.login(),
+                user.age(),
+                user.avatar(),
+                user.target()
+        );
+    }
 }

@@ -11,6 +11,7 @@ import androidx.room.TypeConverters;
 import com.example.fitnesstracker.data.database.converters.SharedConverter;
 import com.example.fitnesstracker.data.database.entities.ExerciseEntity;
 import com.example.fitnesstracker.data.database.entities.RemoteKeys;
+import com.example.fitnesstracker.data.database.entities.WorkoutCrossRef;
 import com.example.fitnesstracker.data.database.entities.WorkoutEntity;
 
 import javax.inject.Singleton;
@@ -23,7 +24,12 @@ import dagger.hilt.components.SingletonComponent;
 
 @Database(
         version = 1,
-        entities = { WorkoutEntity.class, ExerciseEntity.class, RemoteKeys.class },
+        entities = {
+                WorkoutEntity.class,
+                ExerciseEntity.class,
+                RemoteKeys.class,
+                WorkoutCrossRef.class
+        },
         exportSchema = false
 )
 @TypeConverters(SharedConverter.class)
@@ -44,6 +50,7 @@ public abstract class WorkoutDatabase extends RoomDatabase {
                             WorkoutDatabase.class,
                             WorkoutDatabase.class.getSimpleName()
                     )
+                    .fallbackToDestructiveMigration()
                     .build();
         }
 

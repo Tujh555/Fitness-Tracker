@@ -2,8 +2,6 @@ package com.example.fitnesstracker.data.rest.dto;
 
 import androidx.annotation.NonNull;
 
-import com.example.fitnesstracker.domain.workout.models.Approach;
-import com.example.fitnesstracker.domain.workout.models.Exercise;
 import com.example.fitnesstracker.domain.workout.models.Workout;
 import com.google.gson.annotations.SerializedName;
 
@@ -20,16 +18,7 @@ public record WorkoutDto(
     public @NonNull Workout toDomain() {
         final var exerciseModels = exercises
                 .stream()
-                .map(e -> new Exercise(
-                        e.id(),
-                        e.title(),
-                        e.describingPhoto(),
-                        e.approaches()
-                                .stream()
-                                .map(a -> new Approach(a.repetitions(), a.weight()))
-                                .collect(Collectors.toList())
-                        )
-                )
+                .map(ExerciseDto::toDomain)
                 .collect(Collectors.toList());
 
         return new Workout(id, title, Instant.parse(date), exerciseModels);

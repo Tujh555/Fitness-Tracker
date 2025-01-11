@@ -10,6 +10,7 @@ import androidx.paging.rxjava3.RxRemoteMediator;
 import com.example.fitnesstracker.data.database.WorkoutDatabase;
 import com.example.fitnesstracker.data.database.entities.ExerciseEntity;
 import com.example.fitnesstracker.data.database.entities.RemoteKeys;
+import com.example.fitnesstracker.data.database.entities.WorkoutCrossRef;
 import com.example.fitnesstracker.data.database.entities.WorkoutEntity;
 import com.example.fitnesstracker.data.database.entities.WorkoutWithExercises;
 import com.example.fitnesstracker.data.rest.dto.WorkoutDto;
@@ -137,13 +138,15 @@ public class WorkoutsMediator extends RxRemoteMediator<Integer, WorkoutWithExerc
 
             final var workoutEntities = new ArrayList<WorkoutEntity>(workouts.size());
             final var exerciseEntities = new ArrayList<ExerciseEntity>(workouts.size());
+            final var crossRefs = new ArrayList<WorkoutCrossRef>(workouts.size());
 
             workouts.forEach(workout -> {
                 workoutEntities.add(WorkoutEntity.toDb(workout));
 
-                workout.exercises().forEach(exercise ->
-                        exerciseEntities.add(ExerciseEntity.toDb(workout.id(), exercise))
-                );
+                workout.exercises().forEach(exercise -> {
+                    exerciseEntities.add(ExerciseEntity.toDb(exercise));
+                    crossRefs.add(new WorkoutCrossRef(workout.id(), exercise.id()));
+                });
             });
 
             Integer prevKey;
@@ -174,6 +177,7 @@ public class WorkoutsMediator extends RxRemoteMediator<Integer, WorkoutWithExerc
                     .andThen(keysInsertCompletable)
                     .andThen(workoutDao.insertWorkouts(workoutEntities))
                     .andThen(workoutDao.insertExercises(exerciseEntities))
+                    .andThen(workoutDao.insertCrossRef(crossRefs))
                     .subscribeOn(Schedulers.io())
                     .observeOn(Schedulers.io())
                     .blockingAwait();

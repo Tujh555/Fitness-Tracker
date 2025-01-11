@@ -77,7 +77,7 @@ public class AuthViewModel extends DisposableViewModel<AuthScreenState, AuthScre
     }
 
     private void navigateToMainPage(@NonNull User user) {
-        router.navigateTo(MainPageFragment.getScreen(user));
+        router.navigateTo(MainPageFragment.getScreen());
     }
 
     private void processSignInError(Throwable throwable) {

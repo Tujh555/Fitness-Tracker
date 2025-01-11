@@ -2,6 +2,7 @@ package com.example.fitnesstracker.data.database.entities;
 
 import androidx.annotation.NonNull;
 import androidx.room.Embedded;
+import androidx.room.Junction;
 import androidx.room.Relation;
 
 import com.example.fitnesstracker.domain.workout.models.Exercise;
@@ -15,7 +16,8 @@ public class WorkoutWithExercises {
     public WorkoutEntity workout;
     @Relation(
             parentColumn = "id",
-            entityColumn = "workout_id"
+            entityColumn = "exercise_id",
+            associateBy = @Junction(WorkoutCrossRef.class)
     )
     public List<ExerciseEntity> exercises;
 
@@ -28,7 +30,7 @@ public class WorkoutWithExercises {
                         .stream()
                         .map(exercise ->
                                 new Exercise(
-                                        exercise.id,
+                                        exercise.exerciseId,
                                         exercise.title,
                                         exercise.describingPhoto,
                                         exercise.approaches

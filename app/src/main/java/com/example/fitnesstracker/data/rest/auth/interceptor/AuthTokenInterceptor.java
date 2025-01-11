@@ -2,7 +2,7 @@ package com.example.fitnesstracker.data.rest.auth.interceptor;
 
 import androidx.annotation.NonNull;
 
-import com.example.fitnesstracker.data.Storage;
+import com.example.fitnesstracker.data.storage.Storage;
 
 import java.io.IOException;
 

@@ -3,7 +3,7 @@ package com.example.fitnesstracker.data.auth;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.example.fitnesstracker.data.Storage;
+import com.example.fitnesstracker.data.storage.Storage;
 import com.example.fitnesstracker.data.rest.auth.AuthApi;
 import com.example.fitnesstracker.data.rest.auth.LoginRequest;
 import com.example.fitnesstracker.data.rest.auth.RegisterRequest;
