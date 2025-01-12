@@ -2,9 +2,29 @@ package com.example.fitnesstracker.data.storage;
 
 import androidx.annotation.NonNull;
 
-import io.reactivex.rxjava3.core.Flowable;
+import com.example.fitnesstracker.domain.LazyField;
 
-public interface ObservableStorage<T> extends Storage<T> {
+import io.reactivex.rxjava3.core.BackpressureStrategy;
+import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.subjects.BehaviorSubject;
+
+public abstract class ObservableStorage<T> implements Storage<T> {
+    private final LazyField<BehaviorSubject<T>> subject = LazyField.create(() -> {
+        final var item = get();
+
+        if (item == null) {
+            return BehaviorSubject.create();
+        }
+
+        return BehaviorSubject.createDefault(item);
+    });
+
     @NonNull
-    Flowable<T> observe();
+    public final Flowable<T> observe() {
+        return subject.get().toFlowable(BackpressureStrategy.LATEST);
+    }
+
+    protected final void update(T item) {
+        subject.get().onNext(item);
+    }
 }

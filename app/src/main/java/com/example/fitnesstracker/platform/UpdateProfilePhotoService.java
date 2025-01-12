@@ -11,6 +11,7 @@ import com.example.fitnesstracker.domain.profile.ProfileRepository;
 import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
+import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Single;
 
 @AndroidEntryPoint
@@ -20,7 +21,7 @@ public final class UpdateProfilePhotoService extends UploadService {
     public ProfileRepository repository;
 
     @Override
-    Single<?> upload(@NonNull Intent intent) {
+    Completable doWork(@NonNull Intent intent) {
         return Single.<Uri>create(emitter -> {
             try {
                 final Uri uri = intent.getParcelableExtra(uriKey);
@@ -28,7 +29,7 @@ public final class UpdateProfilePhotoService extends UploadService {
             } catch (Exception e) {
                 emitter.onError(e);
             }
-        }).flatMap(repository::uploadAvatar);
+        }).flatMapCompletable(repository::uploadAvatar);
     }
 
     public static void launch(Context context, @NonNull Uri uri) {

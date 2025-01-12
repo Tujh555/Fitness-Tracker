@@ -17,7 +17,7 @@ import com.example.fitnesstracker.R;
 import com.example.fitnesstracker.presentation.MainActivity;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
-import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
@@ -51,12 +51,12 @@ public abstract class UploadService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null) {
             startForeground(notificationId, buildNotification("Загрузка фото..."));
-            final var uploading = upload(intent)
+            final var uploading = doWork(intent)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(
-                            (v) -> stopService(true),
-                            (e) -> {
+                            () -> stopService(true),
+                            e -> {
                                 updateNotification("Ошибка загрузки");
                                 stopService(false);
                             }
@@ -108,5 +108,5 @@ public abstract class UploadService extends Service {
                 .notify(notificationId, buildNotification(message));
     }
 
-    abstract Single<?> upload(@NonNull Intent intent);
+    abstract Completable doWork(@NonNull Intent intent);
 }

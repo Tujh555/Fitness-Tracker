@@ -1,5 +1,6 @@
 package com.example.fitnesstracker.presentation.main;
 
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
@@ -9,14 +10,23 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.fitnesstracker.databinding.FragmentMainBinding;
-import com.example.fitnesstracker.domain.User;
+import com.example.fitnesstracker.domain.workout.WorkoutSummary;
 import com.example.fitnesstracker.presentation.basic.fragment.BaseFragment;
 import com.example.fitnesstracker.presentation.main.action.MainPageScreenAction;
 import com.example.fitnesstracker.presentation.main.components.WorkoutAdapter;
 import com.example.fitnesstracker.presentation.main.state.MainFragmentState;
+import com.github.mikephil.charting.components.Description;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.data.BarData;
+import com.github.mikephil.charting.data.BarDataSet;
+import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import com.github.terrakok.cicerone.androidx.FragmentScreen;
 
 import org.jetbrains.annotations.Contract;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainPageFragment extends BaseFragment<MainFragmentState, MainPageScreenAction, FragmentMainBinding, MainViewModel> {
     private WorkoutAdapter workoutAdapter;
@@ -54,15 +64,49 @@ public class MainPageFragment extends BaseFragment<MainFragmentState, MainPageSc
         if (workouts != null) {
             workoutAdapter.submitData(getLifecycle(), workouts);
         }
+        setupChart(state.summaries());
+    }
+
+    private void setupChart(@NonNull List<WorkoutSummary> summaries) {
+        final var entries = new ArrayList<BarEntry>(summaries.size());
+        final var labels = new ArrayList<String>(summaries.size());
+
+        for (int i = 0; i < summaries.size(); i++) {
+            final var summary = summaries.get(i);
+            entries.add(new BarEntry(i, summary.tonnage()));
+            labels.add(summary.date());
+        }
+
+        final var dataSet = new BarDataSet(entries, "Тоннаж тренировок");
+        dataSet.setColor(Color.GREEN);
+        final var barData = new BarData(dataSet);
+
+        withBinding(binding -> {
+            binding.barChart.setData(barData);
+            final var xAxis = binding.barChart.getXAxis();
+            xAxis.setGranularity(1f);
+            xAxis.setDrawGridLines(false);
+            xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+            xAxis.setValueFormatter(new IndexAxisValueFormatter(labels));
+
+            final var yAxis = binding.barChart.getAxisLeft();
+            yAxis.setDrawGridLines(false);
+            yAxis.setAxisMinimum(0f);
+
+            binding.barChart.getAxisRight().setEnabled(false);
+
+            final var description = new Description();
+            description.setText("Прогресс тренировок");
+            binding.barChart.setDescription(description);
+            binding.barChart.animateY(1000);
+
+            binding.barChart.invalidate();
+        });
     }
 
     @NonNull
     @Contract("_ -> new")
     public static FragmentScreen getScreen() {
-        return FragmentScreen.Companion.invoke(
-                null,
-                true,
-                (f) -> new MainPageFragment()
-        );
+        return FragmentScreen.Companion.invoke(null, true, (f) -> new MainPageFragment());
     }
 }

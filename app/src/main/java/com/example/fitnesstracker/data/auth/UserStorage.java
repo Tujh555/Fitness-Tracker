@@ -8,6 +8,7 @@ import androidx.annotation.Nullable;
 import com.example.fitnesstracker.data.storage.ObservableStorage;
 import com.example.fitnesstracker.data.storage.Storage;
 import com.example.fitnesstracker.data.rest.dto.UserDto;
+import com.example.fitnesstracker.domain.LazyField;
 import com.google.gson.Gson;
 
 import javax.inject.Inject;
@@ -18,22 +19,15 @@ import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.subjects.BehaviorSubject;
 
 @Singleton
-public class UserStorage implements ObservableStorage<UserDto> {
+public class UserStorage extends ObservableStorage<UserDto> {
     private static final String key = "user";
     private final SharedPreferences preferences;
     private final Gson gson = new Gson();
-    private final BehaviorSubject<UserDto> subject = BehaviorSubject.create();
 
     @Inject
     public UserStorage(SharedPreferences sharedPreferences) {
         preferences = sharedPreferences;
         preferences.registerOnSharedPreferenceChangeListener(this::onPrefsChanged);
-    }
-
-    @NonNull
-    @Override
-    public Flowable<UserDto> observe() {
-        return subject.toFlowable(BackpressureStrategy.LATEST);
     }
 
     @Override
@@ -71,7 +65,7 @@ public class UserStorage implements ObservableStorage<UserDto> {
     private void onPrefsChanged(SharedPreferences preferences, String key) {
         final var user = get();
         if (user != null) {
-            subject.onNext(user);
+            update(user);
         }
     }
 }

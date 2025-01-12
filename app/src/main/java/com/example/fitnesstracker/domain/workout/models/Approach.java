@@ -1,3 +1,11 @@
 package com.example.fitnesstracker.domain.workout.models;
 
-public record Approach(int repetitions, int weight) { }
+import androidx.annotation.NonNull;
+
+public record Approach(
+        @NonNull String id,
+        @NonNull String exerciseId,
+        @NonNull String workoutId,
+        int repetitions,
+        int weight
+) { }

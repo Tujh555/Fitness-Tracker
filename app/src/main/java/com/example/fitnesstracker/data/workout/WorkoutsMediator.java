@@ -8,6 +8,7 @@ import androidx.paging.PagingState;
 import androidx.paging.rxjava3.RxRemoteMediator;
 
 import com.example.fitnesstracker.data.database.WorkoutDatabase;
+import com.example.fitnesstracker.data.database.entities.ApproachEntity;
 import com.example.fitnesstracker.data.database.entities.ExerciseEntity;
 import com.example.fitnesstracker.data.database.entities.RemoteKeys;
 import com.example.fitnesstracker.data.database.entities.WorkoutCrossRef;
@@ -139,6 +140,7 @@ public class WorkoutsMediator extends RxRemoteMediator<Integer, WorkoutWithExerc
             final var workoutEntities = new ArrayList<WorkoutEntity>(workouts.size());
             final var exerciseEntities = new ArrayList<ExerciseEntity>(workouts.size());
             final var crossRefs = new ArrayList<WorkoutCrossRef>(workouts.size());
+            final var approaches = new ArrayList<ApproachEntity>(workouts.size());
 
             workouts.forEach(workout -> {
                 workoutEntities.add(WorkoutEntity.toDb(workout));
@@ -146,6 +148,15 @@ public class WorkoutsMediator extends RxRemoteMediator<Integer, WorkoutWithExerc
                 workout.exercises().forEach(exercise -> {
                     exerciseEntities.add(ExerciseEntity.toDb(exercise));
                     crossRefs.add(new WorkoutCrossRef(workout.id(), exercise.id()));
+                });
+
+                workout.approaches().values().forEach(approachesList -> {
+                    final var entities = approachesList
+                            .stream()
+                            .map(ApproachEntity::toDb)
+                            .collect(Collectors.toList());
+
+                    approaches.addAll(entities);
                 });
             });
 
@@ -178,6 +189,7 @@ public class WorkoutsMediator extends RxRemoteMediator<Integer, WorkoutWithExerc
                     .andThen(workoutDao.insertWorkouts(workoutEntities))
                     .andThen(workoutDao.insertExercises(exerciseEntities))
                     .andThen(workoutDao.insertCrossRef(crossRefs))
+                    .andThen(workoutDao.insertApproaches(approaches))
                     .subscribeOn(Schedulers.io())
                     .observeOn(Schedulers.io())
                     .blockingAwait();

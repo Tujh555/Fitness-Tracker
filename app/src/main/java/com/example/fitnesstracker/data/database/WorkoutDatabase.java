@@ -9,6 +9,7 @@ import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
 
 import com.example.fitnesstracker.data.database.converters.SharedConverter;
+import com.example.fitnesstracker.data.database.entities.ApproachEntity;
 import com.example.fitnesstracker.data.database.entities.ExerciseEntity;
 import com.example.fitnesstracker.data.database.entities.RemoteKeys;
 import com.example.fitnesstracker.data.database.entities.WorkoutCrossRef;
@@ -28,7 +29,8 @@ import dagger.hilt.components.SingletonComponent;
                 WorkoutEntity.class,
                 ExerciseEntity.class,
                 RemoteKeys.class,
-                WorkoutCrossRef.class
+                WorkoutCrossRef.class,
+                ApproachEntity.class
         },
         exportSchema = false
 )

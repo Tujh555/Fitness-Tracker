@@ -5,6 +5,7 @@ import androidx.annotation.Nullable;
 
 import com.example.fitnesstracker.domain.User;
 
+import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Single;
 
 public interface AuthRepository {
@@ -18,4 +19,6 @@ public interface AuthRepository {
             @Nullable Integer age,
             @Nullable String name
     );
+
+    Completable logout();
 }

@@ -9,6 +9,8 @@ import com.example.fitnesstracker.presentation.basic.fragment.disposable.Disposa
 import com.example.fitnesstracker.presentation.main.action.MainPageScreenAction;
 import com.example.fitnesstracker.presentation.main.state.MainFragmentState;
 
+import java.util.ArrayList;
+
 import javax.inject.Inject;
 
 import dagger.hilt.android.lifecycle.HiltViewModel;
@@ -19,7 +21,7 @@ public class MainViewModel extends DisposableViewModel<MainFragmentState, MainPa
 
     @Inject
     public MainViewModel(WorkoutRepository repository) {
-        super(new MainFragmentState(null));
+        super(new MainFragmentState(null, new ArrayList<>()));
         this.repository = repository;
         observePagingSource();
     }
@@ -34,6 +36,6 @@ public class MainViewModel extends DisposableViewModel<MainFragmentState, MainPa
     }
 
     private void updatePagingData(PagingData<Workout> workoutPagingData) {
-        updateState(state -> new MainFragmentState(workoutPagingData));
+        updateState(state -> new MainFragmentState(workoutPagingData, state.summaries()));
     }
 }

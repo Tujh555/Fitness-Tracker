@@ -4,7 +4,10 @@ import android.content.Context;
 import android.net.Uri;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
+import com.example.fitnesstracker.data.rest.profile.EditProfileRequest;
+import com.example.fitnesstracker.data.storage.ObservableStorage;
 import com.example.fitnesstracker.data.storage.Storage;
 import com.example.fitnesstracker.data.rest.StreamRequestBody;
 import com.example.fitnesstracker.data.rest.dto.UserDto;
@@ -15,6 +18,8 @@ import com.example.fitnesstracker.domain.profile.ProfileRepository;
 import javax.inject.Inject;
 
 import dagger.hilt.android.qualifiers.ApplicationContext;
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import okhttp3.MultipartBody;
@@ -22,13 +27,13 @@ import okhttp3.MultipartBody;
 public class ProfileRepositoryImpl implements ProfileRepository {
     private final @NonNull Context context;
     private final @NonNull ProfileApi profileApi;
-    private final @NonNull Storage<UserDto> userStorage;
+    private final @NonNull ObservableStorage<UserDto> userStorage;
 
     @Inject
     public ProfileRepositoryImpl(
             @NonNull @ApplicationContext Context context,
             @NonNull ProfileApi profileApi,
-            @NonNull Storage<UserDto> userStorage
+            @NonNull ObservableStorage<UserDto> userStorage
     ) {
         this.context = context;
         this.profileApi = profileApi;
@@ -37,7 +42,13 @@ public class ProfileRepositoryImpl implements ProfileRepository {
 
     @NonNull
     @Override
-    public Single<User> uploadAvatar(@NonNull Uri uri) {
+    public Flowable<User> observe() {
+        return userStorage.observe().map(UserDto::toDomain);
+    }
+
+    @NonNull
+    @Override
+    public Completable uploadAvatar(@NonNull Uri uri) {
         final Single<MultipartBody.Part> createdBody = Single.create(emitter -> {
             try {
                 final var stream = context
@@ -53,16 +64,23 @@ public class ProfileRepositoryImpl implements ProfileRepository {
 
         return createdBody
                 .flatMap(profileApi::uploadAvatar)
-                .doOnSuccess(userStorage::save)
-                .map(UserDto::toDomain)
+                .flatMapCompletable((userDto) -> {
+                    userStorage.save(userDto);
+                    return Completable.complete();
+                })
                 .subscribeOn(Schedulers.io());
     }
 
     @NonNull
     @Override
-    public Single<User> editProfile(@NonNull User user) {
-        return profileApi
-                .editProfile(UserDto.of(user))
+    public Single<User> editProfile(
+            @NonNull String name,
+            @NonNull String login,
+            @Nullable Integer age,
+            @NonNull String target
+    ) {
+        final var request = new EditProfileRequest(name, login, age, target);
+        return profileApi.editProfile(request)
                 .doOnSuccess(userStorage::save)
                 .map(UserDto::toDomain)
                 .subscribeOn(Schedulers.io());

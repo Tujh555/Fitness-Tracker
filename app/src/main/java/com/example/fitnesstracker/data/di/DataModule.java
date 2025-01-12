@@ -1,5 +1,6 @@
 package com.example.fitnesstracker.data.di;
 
+import com.example.fitnesstracker.data.rest.dto.SummaryDto;
 import com.example.fitnesstracker.data.storage.ObservableStorage;
 import com.example.fitnesstracker.data.storage.Storage;
 import com.example.fitnesstracker.data.auth.AuthRepositoryImpl;
@@ -7,10 +8,13 @@ import com.example.fitnesstracker.data.auth.TokenSecureStorage;
 import com.example.fitnesstracker.data.auth.UserStorage;
 import com.example.fitnesstracker.data.profile.ProfileRepositoryImpl;
 import com.example.fitnesstracker.data.rest.dto.UserDto;
+import com.example.fitnesstracker.data.workout.SummaryStorage;
 import com.example.fitnesstracker.data.workout.WorkoutRepositoryImpl;
 import com.example.fitnesstracker.domain.auth.AuthRepository;
 import com.example.fitnesstracker.domain.profile.ProfileRepository;
 import com.example.fitnesstracker.domain.workout.WorkoutRepository;
+
+import java.util.List;
 
 import dagger.Binds;
 import dagger.Module;
@@ -37,4 +41,7 @@ interface DataModule {
 
     @Binds
     ProfileRepository bindProfile(ProfileRepositoryImpl impl);
+
+    @Binds
+    ObservableStorage<List<SummaryDto>> bindSummary(SummaryStorage storage);
 }

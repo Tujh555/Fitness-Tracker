@@ -3,6 +3,8 @@ package com.example.fitnesstracker.data.auth;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.example.fitnesstracker.data.database.WorkoutDatabase;
+import com.example.fitnesstracker.data.rest.auth.LogoutRequest;
 import com.example.fitnesstracker.data.storage.Storage;
 import com.example.fitnesstracker.data.rest.auth.AuthApi;
 import com.example.fitnesstracker.data.rest.auth.LoginRequest;
@@ -12,26 +14,34 @@ import com.example.fitnesstracker.domain.User;
 import com.example.fitnesstracker.domain.auth.AuthRepository;
 import com.example.fitnesstracker.domain.auth.error.NotExistedUserException;
 
+import java.nio.file.Path;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Scheduler;
 import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 @Singleton
 public class AuthRepositoryImpl implements AuthRepository {
     private final Storage<UserDto> userStorage;
     private final AuthApi authApi;
     private final Storage<String> tokenStorage;
+    private final WorkoutDatabase database;
 
     @Inject
     public AuthRepositoryImpl(
             Storage<UserDto> storage,
             Storage<String> authTokenStorage,
-            AuthApi api
+            AuthApi api,
+            WorkoutDatabase database
     ) {
         userStorage = storage;
         authApi = api;
         tokenStorage = authTokenStorage;
+        this.database = database;
     }
 
     @Override
@@ -76,5 +86,29 @@ public class AuthRepositoryImpl implements AuthRepository {
                     userStorage.save(authResponse.userDto());
                 })
                 .map(response -> response.userDto().toDomain());
+    }
+
+    @Override
+    public Completable logout() {
+        return Single
+                .<UserDto>create(emitter -> {
+                    final var user = userStorage.get();
+                    if (user == null || user.login() == null) {
+                        emitter.onError(new IllegalStateException());
+                    } else {
+                        emitter.onSuccess(user);
+                    }
+                })
+                .flatMapCompletable(user -> {
+                    final var logoutRequest = new LogoutRequest(user.login());
+                    return authApi.logout(logoutRequest);
+                })
+                .andThen(database.remoteKeysDao().clear())
+                .andThen(database.workoutDao().clear())
+                .doOnComplete(() -> {
+                    userStorage.clear();
+                    tokenStorage.clear();
+                })
+                .subscribeOn(Schedulers.io());
     }
 }

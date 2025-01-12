@@ -2,6 +2,7 @@ package com.example.fitnesstracker.data.rest.dto;
 
 import androidx.annotation.NonNull;
 
+import com.example.fitnesstracker.data.database.entities.ExerciseEntity;
 import com.example.fitnesstracker.domain.workout.models.Exercise;
 import com.google.gson.annotations.SerializedName;
 
@@ -19,11 +20,11 @@ public record ExerciseDto(
     @NonNull
     @Contract(" -> new")
     public Exercise toDomain() {
-        return new Exercise(
-                id,
-                title,
-                describingPhoto,
-                approaches.stream().map(ApproachDto::toDomain).collect(Collectors.toList())
-        );
+        return new Exercise(id, title, describingPhoto);
+    }
+
+    @NonNull
+    public ExerciseEntity toDb() {
+        return new ExerciseEntity(id, title, describingPhoto);
     }
 }

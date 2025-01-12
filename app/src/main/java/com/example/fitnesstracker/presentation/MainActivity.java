@@ -24,6 +24,7 @@ import com.github.terrakok.cicerone.androidx.FragmentScreen;
 import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
 
 @AndroidEntryPoint
 public class MainActivity extends AppCompatActivity {

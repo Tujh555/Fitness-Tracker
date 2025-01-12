@@ -14,7 +14,7 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.subjects.BehaviorSubject;
 
 public abstract class DisposableViewModel<S, A> extends ViewModel implements BaseViewModel<S, A> {
-    private final @NonNull CompositeDisposable disposables = new CompositeDisposable();
+    protected final @NonNull CompositeDisposable disposables = new CompositeDisposable();
     protected final @NonNull BehaviorSubject<S> stateSubject;
 
     public DisposableViewModel(S initialState) {

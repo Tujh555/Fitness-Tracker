@@ -6,10 +6,7 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
-import com.example.fitnesstracker.domain.workout.models.Approach;
 import com.example.fitnesstracker.domain.workout.models.Exercise;
-
-import java.util.List;
 
 @Entity
 public class ExerciseEntity {
@@ -19,22 +16,19 @@ public class ExerciseEntity {
         public String exerciseId;
         public String title;
         public String describingPhoto;
-        public List<Approach> approaches;
 
     public ExerciseEntity(
             @NonNull String exerciseId,
             @NonNull String title,
-            @Nullable String describingPhoto,
-            @NonNull List<Approach> approaches
+            @Nullable String describingPhoto
     ) {
         this.exerciseId = exerciseId;
         this.title = title;
         this.describingPhoto = describingPhoto;
-        this.approaches = approaches;
     }
 
     public @NonNull Exercise toDomain() {
-        return new Exercise(exerciseId, title, describingPhoto, approaches);
+        return new Exercise(exerciseId, title, describingPhoto);
     }
 
     public static @NonNull ExerciseEntity toDb(
@@ -43,8 +37,7 @@ public class ExerciseEntity {
         return new ExerciseEntity(
                 exercise.id(),
                 exercise.title(),
-                exercise.describingPhoto(),
-                exercise.approaches()
+                exercise.describingPhoto()
         );
     }
 }
