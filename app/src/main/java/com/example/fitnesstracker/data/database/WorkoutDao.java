@@ -18,6 +18,7 @@ import java.util.List;
 
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Single;
 
 @Dao
 public interface WorkoutDao {
@@ -71,4 +72,7 @@ public interface WorkoutDao {
 
     @Query("DELETE FROM ExerciseEntity WHERE exercise_id = :exerciseId")
     Completable deleteExercise(@NonNull String exerciseId);
+
+    @Query("SELECT * FROM ExerciseEntity WHERE exercise_id in (:ids)")
+    Single<List<ExerciseEntity>> selectExercises(List<String> ids);
 }

@@ -10,6 +10,7 @@ import com.example.fitnesstracker.domain.workout.models.Approach;
 import org.jetbrains.annotations.Contract;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,7 +62,7 @@ public class ApproachEntity {
 
     @NonNull
     public static Map<String, List<Approach>> associate(List<ApproachEntity> approaches) {
-        final var map = new LinkedHashMap<String, List<Approach>>();
+        final var map = new HashMap<String, List<Approach>>();
 
         approaches.forEach(approachEntity -> {
             final var approach = approachEntity.toDomain();

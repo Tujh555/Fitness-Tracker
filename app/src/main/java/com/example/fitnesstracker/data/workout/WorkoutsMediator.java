@@ -45,7 +45,6 @@ public class WorkoutsMediator extends RxRemoteMediator<Integer, WorkoutWithExerc
         this.database = database;
     }
 
-
     @NonNull
     @Override
     public Single<MediatorResult> loadSingle(

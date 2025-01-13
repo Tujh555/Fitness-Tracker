@@ -17,17 +17,22 @@ import com.example.fitnesstracker.data.database.WorkoutDao;
 import com.example.fitnesstracker.data.database.entities.ApproachEntity;
 import com.example.fitnesstracker.data.database.entities.ExerciseEntity;
 import com.example.fitnesstracker.data.rest.StreamRequestBody;
+import com.example.fitnesstracker.data.rest.dto.ApproachDto;
 import com.example.fitnesstracker.data.rest.dto.ExerciseDto;
 import com.example.fitnesstracker.data.rest.dto.SummaryDto;
+import com.example.fitnesstracker.data.rest.dto.WorkoutDto;
 import com.example.fitnesstracker.data.rest.workout.WorkoutApi;
 import com.example.fitnesstracker.data.storage.ObservableStorage;
 import com.example.fitnesstracker.domain.workout.WorkoutRepository;
 import com.example.fitnesstracker.domain.workout.WorkoutSummary;
 import com.example.fitnesstracker.domain.workout.models.Exercise;
+import com.example.fitnesstracker.domain.workout.models.Pair;
 import com.example.fitnesstracker.domain.workout.models.Workout;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
@@ -159,6 +164,56 @@ public class WorkoutRepositoryImpl implements WorkoutRepository {
 
     @NonNull
     @Override
+    public Completable createWorkout(
+            @NonNull String title,
+            @NonNull List<String> exerciseIds,
+            @NonNull Map<String, List<Pair<Integer, Integer>>> approaches
+    ) {
+        return workoutDao
+                .selectExercises(exerciseIds)
+                .flatMapCompletable(exerciseEntities -> {
+                    final var workoutId = UUID.randomUUID().toString();
+                    final var date = Instant.now().toString();
+
+                    final var exercises = exerciseEntities
+                            .stream()
+                            .map(exercise -> {
+                                final var approachDtos = approaches
+                                        .getOrDefault(exercise.exerciseId, new ArrayList<>(0))
+                                        .stream()
+                                        .map(pair ->
+                                                new ApproachDto(
+                                                        UUID.randomUUID().toString(),
+                                                        workoutId,
+                                                        exercise.exerciseId,
+                                                        pair.first(),
+                                                        pair.second()
+                                                )
+                                        )
+                                        .collect(Collectors.toList());
+
+                                return new ExerciseDto(
+                                        exercise.exerciseId,
+                                        exercise.title,
+                                        exercise.describingPhoto,
+                                        approachDtos
+                                );
+                            })
+                            .collect(Collectors.toList());
+
+                    final var workout = new WorkoutDto(
+                            workoutId,
+                            title,
+                            date,
+                            exercises
+                    );
+
+                    return workoutApi.createWorkout(workout);
+                });
+    }
+
+    @NonNull
+    @Override
     public Flowable<List<WorkoutSummary>> observeSummary() {
         return summaryStorage
                 .observe()
@@ -166,7 +221,8 @@ public class WorkoutRepositoryImpl implements WorkoutRepository {
                         workoutApi
                                 .getSummary()
                                 .subscribeOn(Schedulers.io())
-                                .subscribe(summaryStorage::save, e -> {})
+                                .subscribe(summaryStorage::save, e -> {
+                                })
                 )
                 .map(summaries ->
                         summaries
@@ -194,7 +250,9 @@ public class WorkoutRepositoryImpl implements WorkoutRepository {
                                     return workoutDao.insertExercises(entities);
                                 })
                                 .subscribeOn(Schedulers.io())
-                                .subscribe(() -> {}, e -> {})
+                                .subscribe(() -> {
+                                }, e -> {
+                                })
                 )
                 .map(exercises ->
                         exercises

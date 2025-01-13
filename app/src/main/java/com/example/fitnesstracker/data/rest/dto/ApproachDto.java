@@ -19,4 +19,16 @@ public record ApproachDto(
     public Approach toDomain() {
         return new Approach(id, exerciseId, workoutId, repetitions, weight);
     }
+
+    @NonNull
+    @Contract("_ -> new")
+    public static ApproachDto of(@NonNull Approach approach) {
+        return new ApproachDto(
+                approach.id(),
+                approach.workoutId(),
+                approach.exerciseId(),
+                approach.repetitions(),
+                approach.weight()
+        );
+    }
 }
