@@ -209,7 +209,8 @@ public class WorkoutRepositoryImpl implements WorkoutRepository {
                     );
 
                     return workoutApi.createWorkout(workout);
-                });
+                })
+                .subscribeOn(Schedulers.io());
     }
 
     @NonNull
