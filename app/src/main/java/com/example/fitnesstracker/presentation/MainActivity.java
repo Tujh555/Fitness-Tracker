@@ -74,15 +74,6 @@ public class MainActivity extends AppCompatActivity {
 
         if (savedInstanceState == null) {
             router.navigateTo(AuthFragment.getScreen());
-            getOnBackPressedDispatcher().addCallback(
-                    this,
-                    new OnBackPressedCallback(true) {
-                        @Override
-                        public void handleOnBackPressed() {
-                            router.exit();
-                        }
-                    }
-            );
         }
     }
 
