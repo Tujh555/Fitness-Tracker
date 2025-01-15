@@ -8,6 +8,8 @@ import com.example.fitnesstracker.domain.workout.models.Workout;
 import com.example.fitnesstracker.presentation.basic.fragment.disposable.DisposableViewModel;
 import com.example.fitnesstracker.presentation.main.action.MainPageScreenAction;
 import com.example.fitnesstracker.presentation.main.state.MainFragmentState;
+import com.example.fitnesstracker.presentation.workout.create.WorkoutAppendFragment;
+import com.github.terrakok.cicerone.Router;
 
 import java.util.ArrayList;
 
@@ -18,11 +20,13 @@ import dagger.hilt.android.lifecycle.HiltViewModel;
 @HiltViewModel
 public class MainViewModel extends DisposableViewModel<MainFragmentState, MainPageScreenAction> {
     private final WorkoutRepository repository;
+    private final @NonNull Router router;
 
     @Inject
-    public MainViewModel(WorkoutRepository repository) {
+    public MainViewModel(WorkoutRepository repository, @NonNull Router router) {
         super(new MainFragmentState(null, new ArrayList<>()));
         this.repository = repository;
+        this.router = router;
         observePagingSource();
     }
 
@@ -32,7 +36,14 @@ public class MainViewModel extends DisposableViewModel<MainFragmentState, MainPa
 
     @Override
     public void onAction(@NonNull MainPageScreenAction action) {
+        if (action instanceof MainPageScreenAction.Edit edit) {
+            edit(edit.workout());
+        }
+    }
 
+    private void edit(@NonNull Workout workout) {
+        final var screen = WorkoutAppendFragment.getScreen(workout);
+        router.navigateTo(screen);
     }
 
     private void updatePagingData(PagingData<Workout> workoutPagingData) {

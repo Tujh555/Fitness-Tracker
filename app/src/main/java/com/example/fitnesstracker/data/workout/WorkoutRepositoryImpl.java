@@ -90,7 +90,7 @@ public class WorkoutRepositoryImpl implements WorkoutRepository {
                     final var approachMap = ApproachEntity.associate(approachList);
                     return workout.toDomain(approachMap);
                 })
-        );
+        ).subscribeOn(Schedulers.io());
     }
 
     @Override
@@ -163,54 +163,65 @@ public class WorkoutRepositoryImpl implements WorkoutRepository {
     }
 
     @NonNull
+    private WorkoutDto createDto(
+            @NonNull String id,
+            @NonNull String title,
+            @NonNull Instant date,
+            @NonNull List<Exercise> exercises,
+            @NonNull Map<String, List<Pair<Integer, Integer>>> approaches
+    ) {
+        final var exerciseDtos = exercises
+                .stream()
+                .map(exercise -> {
+                    final var approachDtos = approaches
+                            .getOrDefault(exercise.id(), new ArrayList<>(0))
+                            .stream()
+                            .map(pair ->
+                                    new ApproachDto(
+                                            UUID.randomUUID().toString(),
+                                            id,
+                                            exercise.id(),
+                                            pair.first(),
+                                            pair.second()
+                                    )
+                            )
+                            .collect(Collectors.toList());
+
+                    return new ExerciseDto(
+                            exercise.id(),
+                            exercise.title(),
+                            exercise.describingPhoto(),
+                            approachDtos
+                    );
+                })
+                .collect(Collectors.toList());
+
+        return new WorkoutDto(id, title, date.toString(), exerciseDtos);
+    }
+
+    @NonNull
     @Override
     public Completable createWorkout(
             @NonNull String title,
-            @NonNull List<String> exerciseIds,
+            @NonNull Instant date,
+            @NonNull List<Exercise> exercises,
             @NonNull Map<String, List<Pair<Integer, Integer>>> approaches
     ) {
-        return workoutDao
-                .selectExercises(exerciseIds)
-                .flatMapCompletable(exerciseEntities -> {
-                    final var workoutId = UUID.randomUUID().toString();
-                    final var date = Instant.now().toString();
+        final var workout = createDto(UUID.randomUUID().toString(), title, date, exercises, approaches);
+        return workoutApi.createWorkout(workout).subscribeOn(Schedulers.io());
+    }
 
-                    final var exercises = exerciseEntities
-                            .stream()
-                            .map(exercise -> {
-                                final var approachDtos = approaches
-                                        .getOrDefault(exercise.exerciseId, new ArrayList<>(0))
-                                        .stream()
-                                        .map(pair ->
-                                                new ApproachDto(
-                                                        UUID.randomUUID().toString(),
-                                                        workoutId,
-                                                        exercise.exerciseId,
-                                                        pair.first(),
-                                                        pair.second()
-                                                )
-                                        )
-                                        .collect(Collectors.toList());
-
-                                return new ExerciseDto(
-                                        exercise.exerciseId,
-                                        exercise.title,
-                                        exercise.describingPhoto,
-                                        approachDtos
-                                );
-                            })
-                            .collect(Collectors.toList());
-
-                    final var workout = new WorkoutDto(
-                            workoutId,
-                            title,
-                            date,
-                            exercises
-                    );
-
-                    return workoutApi.createWorkout(workout);
-                })
-                .subscribeOn(Schedulers.io());
+    @NonNull
+    @Override
+    public Completable editWorkout(
+            @NonNull String id,
+            @NonNull String title,
+            @NonNull Instant date,
+            @NonNull List<Exercise> exercises,
+            @NonNull Map<String, List<Pair<Integer, Integer>>> approaches
+    ) {
+        final var workout = createDto(id, title, date, exercises, approaches);
+        return workoutApi.editWorkout(workout).subscribeOn(Schedulers.io());
     }
 
     @NonNull
@@ -222,8 +233,7 @@ public class WorkoutRepositoryImpl implements WorkoutRepository {
                         workoutApi
                                 .getSummary()
                                 .subscribeOn(Schedulers.io())
-                                .subscribe(summaryStorage::save, e -> {
-                                })
+                                .subscribe(summaryStorage::save, e -> {})
                 )
                 .map(summaries ->
                         summaries
@@ -251,9 +261,7 @@ public class WorkoutRepositoryImpl implements WorkoutRepository {
                                     return workoutDao.insertExercises(entities);
                                 })
                                 .subscribeOn(Schedulers.io())
-                                .subscribe(() -> {
-                                }, e -> {
-                                })
+                                .subscribe(() -> {}, e -> {})
                 )
                 .map(exercises ->
                         exercises

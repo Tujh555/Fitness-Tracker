@@ -8,6 +8,8 @@ import androidx.recyclerview.widget.DiffUtil;
 
 import com.example.fitnesstracker.domain.workout.models.Workout;
 
+import java.util.function.Consumer;
+
 public class WorkoutAdapter extends PagingDataAdapter<Workout, WorkoutViewHolder> {
     private static final DiffUtil.ItemCallback<Workout> comparator = new DiffUtil.ItemCallback<>() {
         @Override
@@ -20,8 +22,12 @@ public class WorkoutAdapter extends PagingDataAdapter<Workout, WorkoutViewHolder
             return oldItem.equals(newItem);
         }
     };
+    private final @NonNull Consumer<Workout> onLongClick;
 
-    public WorkoutAdapter() { super(comparator); }
+    public WorkoutAdapter(@NonNull Consumer<Workout> onLongClick) {
+        super(comparator);
+        this.onLongClick = onLongClick;
+    }
 
     @NonNull
     @Override
@@ -34,7 +40,7 @@ public class WorkoutAdapter extends PagingDataAdapter<Workout, WorkoutViewHolder
         final var item = getItem(position);
 
         if (item != null) {
-            holder.bind(item);
+            holder.bind(item, onLongClick);
         }
     }
 }

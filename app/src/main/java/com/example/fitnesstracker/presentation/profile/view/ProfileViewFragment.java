@@ -13,6 +13,9 @@ import com.example.fitnesstracker.databinding.FragmentViewProfileBinding;
 import com.example.fitnesstracker.domain.User;
 import com.example.fitnesstracker.presentation.basic.fragment.BaseFragment;
 import com.example.fitnesstracker.presentation.profile.view.action.ProfileViewAction;
+import com.github.terrakok.cicerone.androidx.FragmentScreen;
+
+import org.jetbrains.annotations.Contract;
 
 public class ProfileViewFragment extends BaseFragment<User, ProfileViewAction, FragmentViewProfileBinding, ProfileViewModel> {
     @Override
@@ -52,5 +55,13 @@ public class ProfileViewFragment extends BaseFragment<User, ProfileViewAction, F
     @Override
     protected ProfileViewModel createViewModel() {
         return new ViewModelProvider(this).get(ProfileViewModel.class);
+    }
+
+    @NonNull
+    @Contract(" -> new")
+    public static FragmentScreen getScreen() {
+        return FragmentScreen
+                .Companion
+                .invoke(null, true, (f) -> new ProfileViewFragment());
     }
 }

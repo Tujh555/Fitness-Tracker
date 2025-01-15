@@ -1,5 +1,6 @@
 package com.example.fitnesstracker.presentation.main.components;
 
+import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
@@ -15,10 +16,11 @@ import com.example.fitnesstracker.domain.workout.models.Workout;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
+import java.util.function.Consumer;
 
 public class WorkoutViewHolder extends RecyclerView.ViewHolder {
     private final @NonNull DateTimeFormatter formatter = DateTimeFormatter
-            .ofPattern("dd MMM yyyy HH:mm", Locale.getDefault())
+            .ofPattern("HH:mm dd MMM yyyy", Locale.getDefault())
             .withLocale(Locale.getDefault())
             .withZone(ZoneId.systemDefault());
 
@@ -37,7 +39,20 @@ public class WorkoutViewHolder extends RecyclerView.ViewHolder {
         this.parent = parent;
     }
 
-    public void bind(@NonNull Workout workout) {
+    public void bind(@NonNull Workout workout, @NonNull Consumer<Workout> onLongClick) {
+        _binding.getRoot().setOnClickListener(v -> {
+            // TODO разворачивать по клику
+        });
+
+        _binding.getRoot().setOnLongClickListener(view -> {
+            view.performHapticFeedback(
+                    HapticFeedbackConstants.LONG_PRESS,
+                    HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING
+            );
+            onLongClick.accept(workout);
+            return true;
+        });
+
         _binding.tvTitle.setText(workout.title());
         _binding.tvDate.setText(formatter.format(workout.date()));
 

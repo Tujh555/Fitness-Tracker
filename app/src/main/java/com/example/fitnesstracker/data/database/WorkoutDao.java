@@ -57,11 +57,12 @@ public interface WorkoutDao {
     Completable clearCrossRef();
 
     @Transaction
-    default Completable clear() {
-        return clearWorkouts()
+    default void clear() {
+        clearWorkouts()
                 .andThen(clearExercises())
                 .andThen(clearApproaches())
-                .andThen(clearCrossRef());
+                .andThen(clearCrossRef())
+                .blockingAwait();
     }
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

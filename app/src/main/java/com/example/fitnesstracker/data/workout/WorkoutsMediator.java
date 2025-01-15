@@ -131,7 +131,9 @@ public class WorkoutsMediator extends RxRemoteMediator<Integer, WorkoutWithExerc
             final Completable clearCompletable;
 
             if (loadType.equals(LoadType.REFRESH)) {
-                clearCompletable = workoutDao.clear().andThen(keysDao.clear());
+                clearCompletable = Completable
+                        .fromAction(workoutDao::clear)
+                        .andThen(keysDao.clear());
             } else {
                 clearCompletable = Completable.complete();
             }

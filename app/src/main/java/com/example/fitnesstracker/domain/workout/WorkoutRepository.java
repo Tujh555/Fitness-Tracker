@@ -42,7 +42,17 @@ public interface WorkoutRepository {
     @NonNull
     Completable createWorkout(
             @NonNull String title,
-            @NonNull List<String> exerciseIds,
+            @NonNull Instant date,
+            @NonNull List<Exercise> exercises,
+            @NonNull Map<String, List<Pair<Integer, Integer>>> approaches
+    );
+
+    @NonNull
+    Completable editWorkout(
+            @NonNull String id,
+            @NonNull String title,
+            @NonNull Instant date,
+            @NonNull List<Exercise> exercises,
             @NonNull Map<String, List<Pair<Integer, Integer>>> approaches
     );
 }

@@ -19,13 +19,13 @@ import com.example.fitnesstracker.databinding.FragmentExerciseEditBinding;
 import com.example.fitnesstracker.domain.workout.models.Exercise;
 import com.example.fitnesstracker.presentation.SimpleTextWatcher;
 import com.example.fitnesstracker.presentation.basic.fragment.BaseFragment;
-import com.example.fitnesstracker.presentation.exercise.edit.action.ExerciseEditScreenAction;
-import com.example.fitnesstracker.presentation.exercise.edit.state.ExerciseEditScreenState;
+import com.example.fitnesstracker.presentation.exercise.edit.action.ExerciseAppendScreenAction;
+import com.example.fitnesstracker.presentation.exercise.edit.state.ExerciseAppendScreenState;
 import com.github.terrakok.cicerone.androidx.FragmentScreen;
 
 import org.jetbrains.annotations.Contract;
 
-public class ExerciseEditFragment extends BaseFragment<ExerciseEditScreenState, ExerciseEditScreenAction, FragmentExerciseEditBinding, ExerciseEditViewModel> {
+public class ExerciseAppendFragment extends BaseFragment<ExerciseAppendScreenState, ExerciseAppendScreenAction, FragmentExerciseEditBinding, ExerciseAppendViewModel> {
     private static final String existingExerciseKey = "exercise";
     private ActivityResultLauncher<PickVisualMediaRequest> pickImage;
 
@@ -36,8 +36,8 @@ public class ExerciseEditFragment extends BaseFragment<ExerciseEditScreenState, 
     ) {
         final var binding = FragmentExerciseEditBinding.inflate(inflater, container, false);
 
-        binding.btnCancel.setOnClickListener(v -> onAction(new ExerciseEditScreenAction.Cancel()));
-        binding.btnSave.setOnClickListener(v -> onAction(new ExerciseEditScreenAction.Save()));
+        binding.btnCancel.setOnClickListener(v -> onAction(new ExerciseAppendScreenAction.Cancel()));
+        binding.btnSave.setOnClickListener(v -> onAction(new ExerciseAppendScreenAction.Save()));
 
         final var arguments = getArguments();
 
@@ -45,7 +45,7 @@ public class ExerciseEditFragment extends BaseFragment<ExerciseEditScreenState, 
             final var existingExercise = (Exercise) arguments.getSerializable(existingExerciseKey);
 
             if (existingExercise != null) {
-                onAction(new ExerciseEditScreenAction.IdReceived(existingExercise.id()));
+                onAction(new ExerciseAppendScreenAction.IdReceived(existingExercise.id()));
                 binding.etTitle.setText(existingExercise.title());
 
                 Glide.with(this)
@@ -58,7 +58,7 @@ public class ExerciseEditFragment extends BaseFragment<ExerciseEditScreenState, 
 
         pickImage = registerForActivityResult(
                 new ActivityResultContracts.PickVisualMedia(),
-                uri -> onAction(new ExerciseEditScreenAction.UriReceived(uri))
+                uri -> onAction(new ExerciseAppendScreenAction.UriReceived(uri))
         );
         binding.ivDescribingPhoto.setOnClickListener((v) -> {
             final var request = PickVisualMediaRequestKt.PickVisualMediaRequest(
@@ -69,7 +69,7 @@ public class ExerciseEditFragment extends BaseFragment<ExerciseEditScreenState, 
 
         binding.etTitle.addTextChangedListener(
                 SimpleTextWatcher.create(text ->
-                        onAction(new ExerciseEditScreenAction.TitleInput(text))
+                        onAction(new ExerciseAppendScreenAction.TitleInput(text))
                 )
         );
 
@@ -77,7 +77,7 @@ public class ExerciseEditFragment extends BaseFragment<ExerciseEditScreenState, 
     }
 
     @Override
-    protected void onStateChanged(@NonNull ExerciseEditScreenState state) {
+    protected void onStateChanged(@NonNull ExerciseAppendScreenState state) {
         super.onStateChanged(state);
         withBinding(binding -> {
             updateEditText(binding.etTitle, state.title());
@@ -99,15 +99,15 @@ public class ExerciseEditFragment extends BaseFragment<ExerciseEditScreenState, 
 
     @NonNull
     @Override
-    protected ExerciseEditViewModel createViewModel() {
-        return new ViewModelProvider(this).get(ExerciseEditViewModel.class);
+    protected ExerciseAppendViewModel createViewModel() {
+        return new ViewModelProvider(this).get(ExerciseAppendViewModel.class);
     }
 
     @NonNull
     @Contract("_ -> new")
     public static FragmentScreen getScreen(@Nullable Exercise exercise) {
         return FragmentScreen.Companion.invoke(null, true, f -> {
-            final var fragment = new ExerciseEditFragment();
+            final var fragment = new ExerciseAppendFragment();
 
             if (exercise != null) {
                 final var args = new Bundle();

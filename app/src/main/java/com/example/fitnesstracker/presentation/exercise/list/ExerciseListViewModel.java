@@ -6,7 +6,7 @@ import androidx.annotation.Nullable;
 import com.example.fitnesstracker.domain.workout.WorkoutRepository;
 import com.example.fitnesstracker.domain.workout.models.Exercise;
 import com.example.fitnesstracker.presentation.basic.fragment.disposable.DisposableViewModel;
-import com.example.fitnesstracker.presentation.exercise.edit.ExerciseEditFragment;
+import com.example.fitnesstracker.presentation.exercise.edit.ExerciseAppendFragment;
 import com.github.terrakok.cicerone.Router;
 
 import java.util.ArrayList;
@@ -39,7 +39,7 @@ public class ExerciseListViewModel extends DisposableViewModel<List<Exercise>, E
     }
 
     private void openEditExercise(@Nullable Exercise exercise) {
-        final var screen = ExerciseEditFragment.getScreen(exercise);
+        final var screen = ExerciseAppendFragment.getScreen(exercise);
         router.navigateTo(screen);
     }
 

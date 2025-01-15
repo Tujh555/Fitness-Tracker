@@ -43,7 +43,10 @@ public class ProfileRepositoryImpl implements ProfileRepository {
     @NonNull
     @Override
     public Flowable<User> observe() {
-        return userStorage.observe().map(UserDto::toDomain);
+        return userStorage
+                .observe()
+                .map(UserDto::toDomain)
+                .subscribeOn(Schedulers.io());
     }
 
     @NonNull

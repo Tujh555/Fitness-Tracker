@@ -117,7 +117,7 @@ public class SignUpViewModel extends DisposableViewModel<SignUpScreenState, Sign
     }
 
     private void navigateToMainPage(User user) {
-        router.navigateTo(MainPageFragment.getScreen());
+        router.newRootScreen(MainPageFragment.getScreen());
     }
 
     private void processSignUpError() {

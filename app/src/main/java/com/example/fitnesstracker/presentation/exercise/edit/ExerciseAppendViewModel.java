@@ -7,8 +7,8 @@ import androidx.annotation.NonNull;
 
 import com.example.fitnesstracker.platform.PutExerciseService;
 import com.example.fitnesstracker.presentation.basic.fragment.disposable.DisposableViewModel;
-import com.example.fitnesstracker.presentation.exercise.edit.action.ExerciseEditScreenAction;
-import com.example.fitnesstracker.presentation.exercise.edit.state.ExerciseEditScreenState;
+import com.example.fitnesstracker.presentation.exercise.edit.action.ExerciseAppendScreenAction;
+import com.example.fitnesstracker.presentation.exercise.edit.state.ExerciseAppendScreenState;
 import com.github.terrakok.cicerone.Router;
 
 import javax.inject.Inject;
@@ -17,45 +17,45 @@ import dagger.hilt.android.lifecycle.HiltViewModel;
 import dagger.hilt.android.qualifiers.ApplicationContext;
 
 @HiltViewModel
-public class ExerciseEditViewModel extends DisposableViewModel<ExerciseEditScreenState, ExerciseEditScreenAction> {
+public class ExerciseAppendViewModel extends DisposableViewModel<ExerciseAppendScreenState, ExerciseAppendScreenAction> {
     private final @NonNull Router router;
     private final @NonNull Context context;
 
     @Inject
-    public ExerciseEditViewModel(
+    public ExerciseAppendViewModel(
             @NonNull Router router,
             @NonNull @ApplicationContext Context context
     ) {
-        super(new ExerciseEditScreenState(null, null, ""));
+        super(new ExerciseAppendScreenState(null, null, ""));
         this.router = router;
         this.context = context;
     }
 
     @Override
-    public void onAction(@NonNull ExerciseEditScreenAction action) {
-        if (action instanceof ExerciseEditScreenAction.Cancel) {
+    public void onAction(@NonNull ExerciseAppendScreenAction action) {
+        if (action instanceof ExerciseAppendScreenAction.Cancel) {
             router.exit();
-        } else if (action instanceof ExerciseEditScreenAction.Save) {
+        } else if (action instanceof ExerciseAppendScreenAction.Save) {
             save();
-        } else if (action instanceof ExerciseEditScreenAction.TitleInput titleInput) {
+        } else if (action instanceof ExerciseAppendScreenAction.TitleInput titleInput) {
             titleInput(titleInput.text());
-        } else if (action instanceof ExerciseEditScreenAction.UriReceived uriReceived) {
+        } else if (action instanceof ExerciseAppendScreenAction.UriReceived uriReceived) {
             onUriReceived(uriReceived.uri());
-        } else if (action instanceof ExerciseEditScreenAction.IdReceived idReceived) {
+        } else if (action instanceof ExerciseAppendScreenAction.IdReceived idReceived) {
             onIdReceived(idReceived.id());
         }
     }
 
     private void onIdReceived(@NonNull String id) {
-        updateState(state -> new ExerciseEditScreenState(id, state.uri(), state.title()));
+        updateState(state -> new ExerciseAppendScreenState(id, state.uri(), state.title()));
     }
 
     private void onUriReceived(@NonNull Uri uri) {
-        updateState(state -> new ExerciseEditScreenState(state.existingId(), uri, state.title()));
+        updateState(state -> new ExerciseAppendScreenState(state.existingId(), uri, state.title()));
     }
 
     private void titleInput(@NonNull String titleText) {
-        updateState(state -> new ExerciseEditScreenState(state.existingId(), state.uri(), titleText));
+        updateState(state -> new ExerciseAppendScreenState(state.existingId(), state.uri(), titleText));
     }
 
     private void save() {

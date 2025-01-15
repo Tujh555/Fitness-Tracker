@@ -46,7 +46,7 @@ public class AuthRepositoryImpl implements AuthRepository {
 
     @Override
     public Single<User> getExisting() {
-        return Single.create(emitter -> {
+        return Single.<User>create(emitter -> {
             final var userDto = userStorage.get();
 
             if (userDto == null) {
@@ -54,7 +54,7 @@ public class AuthRepositoryImpl implements AuthRepository {
             } else {
                 emitter.onSuccess(userDto.toDomain());
             }
-        });
+        }).subscribeOn(Schedulers.io());
     }
 
     @Override
@@ -67,7 +67,8 @@ public class AuthRepositoryImpl implements AuthRepository {
                     tokenStorage.save(authResponse.authToken());
                     userStorage.save(authResponse.userDto());
                 })
-                .map(response -> response.userDto().toDomain());
+                .map(response -> response.userDto().toDomain())
+                .subscribeOn(Schedulers.io());
     }
 
     @Override
@@ -85,7 +86,8 @@ public class AuthRepositoryImpl implements AuthRepository {
                     tokenStorage.save(authResponse.authToken());
                     userStorage.save(authResponse.userDto());
                 })
-                .map(response -> response.userDto().toDomain());
+                .map(response -> response.userDto().toDomain())
+                .subscribeOn(Schedulers.io());
     }
 
     @Override
@@ -104,7 +106,7 @@ public class AuthRepositoryImpl implements AuthRepository {
                     return authApi.logout(logoutRequest);
                 })
                 .andThen(database.remoteKeysDao().clear())
-                .andThen(database.workoutDao().clear())
+                .andThen(Completable.fromAction(() -> database.workoutDao().clear()))
                 .doOnComplete(() -> {
                     userStorage.clear();
                     tokenStorage.clear();

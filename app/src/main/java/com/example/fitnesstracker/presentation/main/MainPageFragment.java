@@ -38,7 +38,7 @@ public class MainPageFragment extends BaseFragment<MainFragmentState, MainPageSc
     ) {
         final var binding = FragmentMainBinding.inflate(inflater, container, false);
 
-        workoutAdapter = new WorkoutAdapter();
+        workoutAdapter = new WorkoutAdapter(workout -> onAction(new MainPageScreenAction.Edit(workout)));
         final var layoutManager = new LinearLayoutManager(
                 binding.getRoot().getContext(),
                 LinearLayoutManager.VERTICAL,

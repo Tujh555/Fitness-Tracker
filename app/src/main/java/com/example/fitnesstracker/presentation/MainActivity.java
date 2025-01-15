@@ -3,6 +3,7 @@ package com.example.fitnesstracker.presentation;
 import android.os.Bundle;
 
 import androidx.activity.EdgeToEdge;
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -14,7 +15,11 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.example.fitnesstracker.R;
+import com.example.fitnesstracker.databinding.ActivityMainBinding;
 import com.example.fitnesstracker.presentation.auth.AuthFragment;
+import com.example.fitnesstracker.presentation.main.MainPageFragment;
+import com.example.fitnesstracker.presentation.profile.view.ProfileViewFragment;
+import com.example.fitnesstracker.presentation.workout.create.WorkoutAppendFragment;
 import com.github.terrakok.cicerone.Navigator;
 import com.github.terrakok.cicerone.NavigatorHolder;
 import com.github.terrakok.cicerone.Router;
@@ -37,9 +42,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        final var binding = ActivityMainBinding.inflate(getLayoutInflater());
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_main);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+        setContentView(binding.getRoot());
+        ViewCompat.setOnApplyWindowInsetsListener(binding.main, (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
@@ -47,8 +53,36 @@ public class MainActivity extends AppCompatActivity {
 
         navigator = new AnimatedAppNavigator(this, R.id.main_container);
 
+        binding.bottomNav.setOnItemSelectedListener(item -> {
+            if (item.getItemId() == R.id.menu_home) {
+                router.newRootScreen(MainPageFragment.getScreen());
+                return true;
+            }
+
+            if (item.getItemId() == R.id.menu_workouts) {
+                router.newRootScreen(WorkoutAppendFragment.getScreen(null));
+                return true;
+            }
+
+            if (item.getItemId() == R.id.menu_profile) {
+                router.newRootScreen(ProfileViewFragment.getScreen());
+                return true;
+            }
+
+            return false;
+        });
+
         if (savedInstanceState == null) {
             router.navigateTo(AuthFragment.getScreen());
+            getOnBackPressedDispatcher().addCallback(
+                    this,
+                    new OnBackPressedCallback(true) {
+                        @Override
+                        public void handleOnBackPressed() {
+                            router.exit();
+                        }
+                    }
+            );
         }
     }
 

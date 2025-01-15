@@ -32,11 +32,17 @@ public abstract class DisposableViewModel<S, A> extends ViewModel implements Bas
     }
 
     protected final void onSubscribe(@NonNull SingleFactory factory) {
-        factory.create().subscribe((v) -> {}, (e) -> {}, disposables);
+        factory
+                .create()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe((v) -> {}, (e) -> {}, disposables);
     }
 
     protected final void onSubscribe(@NonNull FlowableFactory factory) {
-        factory.create().subscribe((v) -> {}, (t) -> {}, () -> {}, disposables);
+        factory
+                .create()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe((v) -> {}, (t) -> {}, () -> {}, disposables);
     }
 
     @Override
