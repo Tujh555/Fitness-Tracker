@@ -27,7 +27,7 @@ public class AuthTokenInterceptor implements Interceptor {
         final var token = storage.get();
 
         if (token != null) {
-            builder.addHeader("Authorization", "Basic " + token);
+            builder.addHeader("Authorization", "Bearer " + token);
         }
 
         return chain.proceed(builder.build());

@@ -12,7 +12,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 public record UserDto(
-        @Nullable @SerializedName("id") String id,
+        @Nullable @SerializedName("id") Integer id,
         @Nullable @SerializedName("name") String name,
         @Nullable @SerializedName("login") String login,
         @Nullable @SerializedName("age") Integer age,
@@ -23,7 +23,7 @@ public record UserDto(
     @Contract(" -> new")
     public User toDomain() {
         return new User(
-                Objects.requireNonNullElse(id(), UUID.randomUUID().toString()),
+                Objects.requireNonNullElse(id(), Integer.valueOf(0)),
                 Objects.requireNonNullElse(name(), "Unknown"),
                 Objects.requireNonNullElse(login(), "unknown"),
                 Objects.requireNonNullElse(age(), 18),

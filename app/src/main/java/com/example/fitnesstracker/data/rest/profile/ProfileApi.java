@@ -11,9 +11,9 @@ import retrofit2.http.Part;
 
 public interface ProfileApi {
     @Multipart
-    @POST("avatar")
+    @POST("profile/avatar")
     Single<UserDto> uploadAvatar(@Part MultipartBody.Part photo);
 
-    @POST("profile")
+    @POST("profile/edit")
     Single<UserDto> editProfile(@Body EditProfileRequest body);
 }

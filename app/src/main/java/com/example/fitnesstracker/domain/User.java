@@ -6,7 +6,7 @@ import androidx.annotation.Nullable;
 import java.io.Serializable;
 
 public record User(
-        @NonNull String id,
+        @NonNull Integer id,
         @NonNull String name,
         @NonNull String login,
         @Nullable Integer age,

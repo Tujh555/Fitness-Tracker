@@ -102,7 +102,7 @@ public class AuthRepositoryImpl implements AuthRepository {
                     }
                 })
                 .flatMapCompletable(user -> {
-                    final var logoutRequest = new LogoutRequest(user.login());
+                    final var logoutRequest = new LogoutRequest(user.id());
                     return authApi.logout(logoutRequest);
                 })
                 .andThen(database.remoteKeysDao().clear())
