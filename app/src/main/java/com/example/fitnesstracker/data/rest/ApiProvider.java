@@ -33,7 +33,7 @@ public class ApiProvider {
                 .build();
 
         return new Retrofit.Builder()
-                .baseUrl("https://dion.vc")
+                .baseUrl("http://10.0.2.2:8080/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
                 .client(client)

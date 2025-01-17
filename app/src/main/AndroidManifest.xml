@@ -16,7 +16,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FitnessTracker"
         tools:targetApi="31"
-        android:name=".platform.App">
+        android:name=".platform.App"
+        android:usesCleartextTraffic="true">
 
         <service android:name=".platform.UpdateProfilePhotoService"
             android:enabled="true"
