@@ -19,6 +19,7 @@ import com.example.fitnesstracker.data.database.entities.ApproachEntity;
 import com.example.fitnesstracker.data.database.entities.ExerciseEntity;
 import com.example.fitnesstracker.data.database.entities.WorkoutCrossRef;
 import com.example.fitnesstracker.data.database.entities.WorkoutEntity;
+import com.example.fitnesstracker.data.profile.FileUtils;
 import com.example.fitnesstracker.data.rest.StreamRequestBody;
 import com.example.fitnesstracker.data.rest.dto.ApproachDto;
 import com.example.fitnesstracker.data.rest.dto.ExerciseDto;
@@ -133,8 +134,9 @@ public class WorkoutRepositoryImpl implements WorkoutRepository {
                 final var stream = context
                         .getContentResolver()
                         .openInputStream(uri);
+                final var fileName = FileUtils.getFileName(context, uri);
                 final var body = new StreamRequestBody(stream);
-                final var multipart = MultipartBody.Part.createFormData("photo", "", body);
+                final var multipart = MultipartBody.Part.createFormData("file", fileName, body);
                 emitter.onSuccess(multipart);
             } catch (Exception e) {
                 emitter.onError(e);
@@ -150,19 +152,11 @@ public class WorkoutRepositoryImpl implements WorkoutRepository {
         if (uri != null) {
             response = createMultipart(uri).flatMap(body -> {
                 final var titleBody = RequestBody.create(title, MediaType.get("text/plain"));
-                return workoutApi.putExercise(
-                        UUID.randomUUID().toString(),
-                        body,
-                        titleBody
-                );
+                return workoutApi.putExercise(null, body, titleBody);
             });
         } else {
             final var titleBody = RequestBody.create(title, MediaType.get("text/plain"));
-            response = workoutApi.putExercise(
-                    UUID.randomUUID().toString(),
-                    null,
-                    titleBody
-            );
+            response = workoutApi.putExercise(null, null, titleBody);
         }
 
         return response
@@ -176,7 +170,7 @@ public class WorkoutRepositoryImpl implements WorkoutRepository {
 
     @NonNull
     private WorkoutDto createDto(
-            @NonNull String id,
+            @Nullable String id,
             @NonNull String title,
             @NonNull Instant date,
             @NonNull List<Exercise> exercises,
@@ -188,15 +182,7 @@ public class WorkoutRepositoryImpl implements WorkoutRepository {
                     final var approachDtos = approaches
                             .getOrDefault(exercise.id(), new ArrayList<>(0))
                             .stream()
-                            .map(pair ->
-                                    new ApproachDto(
-                                            UUID.randomUUID().toString(),
-                                            id,
-                                            exercise.id(),
-                                            pair.first(),
-                                            pair.second()
-                                    )
-                            )
+                            .map(pair -> new ApproachDto(null, id, exercise.id(), pair.first(), pair.second()))
                             .collect(Collectors.toList());
 
                     return new ExerciseDto(
@@ -219,7 +205,7 @@ public class WorkoutRepositoryImpl implements WorkoutRepository {
             @NonNull List<Exercise> exercises,
             @NonNull Map<String, List<Pair<Integer, Integer>>> approaches
     ) {
-        final var workout = createDto(UUID.randomUUID().toString(), title, date, exercises, approaches);
+        final var workout = createDto(null, title, date, exercises, approaches);
         return workoutApi
                 .createWorkout(workout)
                 .flatMapCompletable(dto -> insertWorkout(dto.toDomain()))
@@ -238,7 +224,11 @@ public class WorkoutRepositoryImpl implements WorkoutRepository {
         final var workout = createDto(id, title, date, exercises, approaches);
         return workoutApi
                 .editWorkout(workout)
-                .flatMapCompletable(dto -> insertWorkout(dto.toDomain()))
+                .flatMapCompletable(dto ->
+                        workoutDao
+                                .clearApproachesForWorkout(id)
+                                .andThen(insertWorkout(dto.toDomain()))
+                )
                 .subscribeOn(Schedulers.io());
     }
 
@@ -264,8 +254,8 @@ public class WorkoutRepositoryImpl implements WorkoutRepository {
         return workoutDao
                 .insertWorkouts(workoutEntity)
                 .andThen(workoutDao.insertExercises(exerciseEntities))
-                .andThen(workoutDao.insertCrossRef(crossRefs))
                 .andThen(workoutDao.insertApproaches(approaches))
+                .andThen(workoutDao.insertCrossRef(crossRefs))
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io());
     }

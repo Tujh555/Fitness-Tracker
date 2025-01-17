@@ -59,7 +59,7 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                         .openInputStream(uri);
                 final var body = new StreamRequestBody(stream);
                 final var name = FileUtils.getFileName(context, uri);
-                final var multipart = MultipartBody.Part.createFormData("photo", name, body);
+                final var multipart = MultipartBody.Part.createFormData("file", name, body);
                 emitter.onSuccess(multipart);
             } catch (Exception e) {
                 emitter.onError(e);

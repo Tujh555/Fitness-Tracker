@@ -42,7 +42,7 @@ public interface WorkoutDao {
     Completable insertCrossRef(List<WorkoutCrossRef> refs);
 
     @Query("UPDATE ExerciseEntity SET describingPhoto = :photo WHERE exercise_id = :id")
-    Completable putExercisePhoto(@NonNull String id, @NonNull String photo);
+    Completable putExercisePhoto(String id, String photo);
 
     @Query("DELETE FROM WorkoutEntity")
     Completable clearWorkouts();
@@ -68,12 +68,6 @@ public interface WorkoutDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     Completable insertApproaches(List<ApproachEntity> approaches);
 
-    @Query("DELETE FROM WorkoutCrossRef WHERE exercise_id = :exerciseId")
-    Completable deleteCrossRefWhere(@NonNull String exerciseId);
-
-    @Query("DELETE FROM ExerciseEntity WHERE exercise_id = :exerciseId")
-    Completable deleteExercise(@NonNull String exerciseId);
-
-    @Query("SELECT * FROM ExerciseEntity WHERE exercise_id in (:ids)")
-    Single<List<ExerciseEntity>> selectExercises(List<String> ids);
+    @Query("DELETE FROM ApproachEntity WHERE workout_id = :id")
+    Completable clearApproachesForWorkout(String id);
 }
