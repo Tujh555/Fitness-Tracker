@@ -23,7 +23,7 @@ public record UserDto(
     @Contract(" -> new")
     public User toDomain() {
         return new User(
-                Objects.requireNonNullElse(id(), Integer.valueOf(0)),
+                Objects.requireNonNullElse(id(), 0),
                 Objects.requireNonNullElse(name(), "Unknown"),
                 Objects.requireNonNullElse(login(), "unknown"),
                 Objects.requireNonNullElse(age(), 18),

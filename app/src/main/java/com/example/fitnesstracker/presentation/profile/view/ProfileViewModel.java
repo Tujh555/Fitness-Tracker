@@ -27,7 +27,7 @@ public class ProfileViewModel extends DisposableViewModel<User, ProfileViewActio
             @NonNull AuthRepository authRepository,
             @NonNull Router router
     ) {
-        super(new User("", "", "", 0, "", ""));
+        super(new User(0, "", "", 0, "", ""));
 
         this.profileRepository = profileRepository;
         this.authRepository = authRepository;

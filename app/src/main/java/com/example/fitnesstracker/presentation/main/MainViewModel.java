@@ -12,6 +12,7 @@ import com.example.fitnesstracker.presentation.workout.create.WorkoutAppendFragm
 import com.github.terrakok.cicerone.Router;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -46,7 +47,7 @@ public class MainViewModel extends DisposableViewModel<MainFragmentState, MainPa
         router.navigateTo(screen);
     }
 
-    private void updatePagingData(PagingData<Workout> workoutPagingData) {
-        updateState(state -> new MainFragmentState(workoutPagingData, state.summaries()));
+    private void updatePagingData(List<Workout> workouts) {
+        updateState(state -> new MainFragmentState(workouts, state.summaries()));
     }
 }

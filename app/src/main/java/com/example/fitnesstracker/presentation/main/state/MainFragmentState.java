@@ -2,7 +2,6 @@ package com.example.fitnesstracker.presentation.main.state;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.paging.PagingData;
 
 import com.example.fitnesstracker.domain.workout.WorkoutSummary;
 import com.example.fitnesstracker.domain.workout.models.Workout;
@@ -10,6 +9,6 @@ import com.example.fitnesstracker.domain.workout.models.Workout;
 import java.util.List;
 
 public record MainFragmentState(
-        @Nullable PagingData<Workout> workouts,
+        @Nullable List<Workout> workouts,
         @NonNull List<WorkoutSummary> summaries
 ) { }

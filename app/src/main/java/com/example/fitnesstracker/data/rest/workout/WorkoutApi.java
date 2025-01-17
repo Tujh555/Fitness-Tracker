@@ -23,10 +23,7 @@ import retrofit2.http.Query;
 public interface WorkoutApi {
 
     @GET("workouts")
-    Single<WorkoutPage> getWorkouts(
-            @Query("page") int page,
-            @Query("size") int pageSize
-    );
+    Single<List<WorkoutDto>> getWorkouts();
 
     @Multipart
     @POST("exercises/{id}")
@@ -43,8 +40,8 @@ public interface WorkoutApi {
     Single<List<ExerciseDto>> getExercises();
 
     @POST("workouts")
-    Completable createWorkout(@Body WorkoutDto workout);
+    Single<WorkoutDto> createWorkout(@Body WorkoutDto workout);
 
     @PUT("workouts")
-    Completable editWorkout(@Body WorkoutDto workout);
+    Single<WorkoutDto> editWorkout(@Body WorkoutDto workout);
 }

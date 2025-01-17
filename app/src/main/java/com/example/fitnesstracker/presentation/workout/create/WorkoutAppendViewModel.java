@@ -27,6 +27,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel;
 import dagger.hilt.android.qualifiers.ApplicationContext;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Single;
 
 @HiltViewModel
 public class WorkoutAppendViewModel extends DisposableViewModel<WorkoutAppendScreenState, WorkoutAppendScreenAction> {

@@ -105,7 +105,6 @@ public class AuthRepositoryImpl implements AuthRepository {
                     final var logoutRequest = new LogoutRequest(user.id());
                     return authApi.logout(logoutRequest);
                 })
-                .andThen(database.remoteKeysDao().clear())
                 .andThen(Completable.fromAction(() -> database.workoutDao().clear()))
                 .doOnComplete(() -> {
                     userStorage.clear();

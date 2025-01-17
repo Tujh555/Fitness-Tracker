@@ -5,12 +5,13 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.paging.PagingDataAdapter;
 import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.ListAdapter;
 
 import com.example.fitnesstracker.domain.workout.models.Workout;
 
 import java.util.function.Consumer;
 
-public class WorkoutAdapter extends PagingDataAdapter<Workout, WorkoutViewHolder> {
+public class WorkoutAdapter extends ListAdapter<Workout, WorkoutViewHolder> {
     private static final DiffUtil.ItemCallback<Workout> comparator = new DiffUtil.ItemCallback<>() {
         @Override
         public boolean areItemsTheSame(@NonNull Workout oldItem, @NonNull Workout newItem) {

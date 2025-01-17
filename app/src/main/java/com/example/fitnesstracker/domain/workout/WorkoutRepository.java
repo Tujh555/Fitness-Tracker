@@ -21,7 +21,7 @@ import io.reactivex.rxjava3.core.Single;
 
 public interface WorkoutRepository {
     @NonNull
-    Flowable<PagingData<Workout>> observeWorkouts();
+    Flowable<List<Workout>> observeWorkouts();
 
     @NonNull
     Flowable<List<WorkoutSummary>> observeSummary();

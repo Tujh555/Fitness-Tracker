@@ -62,7 +62,7 @@ public class MainPageFragment extends BaseFragment<MainFragmentState, MainPageSc
         final var workouts = state.workouts();
 
         if (workouts != null) {
-            workoutAdapter.submitData(getLifecycle(), workouts);
+            workoutAdapter.submitList(workouts);
         }
         setupChart(state.summaries());
     }

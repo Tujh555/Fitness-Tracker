@@ -24,7 +24,7 @@ import io.reactivex.rxjava3.core.Single;
 public interface WorkoutDao {
     @Transaction
     @Query("SELECT * FROM WorkoutEntity")
-    PagingSource<Integer, WorkoutWithExercises> selectWorkouts();
+    Flowable<List<WorkoutWithExercises>> selectWorkouts();
 
     @Query("SELECT * FROM ApproachEntity")
     Flowable<List<ApproachEntity>> selectApproaches();

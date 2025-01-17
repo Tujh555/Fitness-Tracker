@@ -14,8 +14,11 @@ import androidx.paging.PagingDataTransforms;
 import androidx.paging.rxjava3.PagingRx;
 
 import com.example.fitnesstracker.data.database.WorkoutDao;
+import com.example.fitnesstracker.data.database.WorkoutDatabase;
 import com.example.fitnesstracker.data.database.entities.ApproachEntity;
 import com.example.fitnesstracker.data.database.entities.ExerciseEntity;
+import com.example.fitnesstracker.data.database.entities.WorkoutCrossRef;
+import com.example.fitnesstracker.data.database.entities.WorkoutEntity;
 import com.example.fitnesstracker.data.rest.StreamRequestBody;
 import com.example.fitnesstracker.data.rest.dto.ApproachDto;
 import com.example.fitnesstracker.data.rest.dto.ExerciseDto;
@@ -51,46 +54,55 @@ import okhttp3.RequestBody;
 @OptIn(markerClass = ExperimentalPagingApi.class)
 public class WorkoutRepositoryImpl implements WorkoutRepository {
     private final @NonNull WorkoutDao workoutDao;
-    private final @NonNull WorkoutsMediator workoutsMediator;
     private final @NonNull Context context;
     private final @NonNull WorkoutApi workoutApi;
     private final @NonNull ObservableStorage<List<SummaryDto>> summaryStorage;
+    private final @NonNull WorkoutDatabase database;
 
     @Inject
     public WorkoutRepositoryImpl(
             @NonNull WorkoutDao workoutDao,
-            @NonNull WorkoutsMediator workoutsMediator,
             @NonNull @ApplicationContext Context context,
             @NonNull WorkoutApi workoutApi,
-            @NonNull ObservableStorage<List<SummaryDto>> summaryStorage
+            @NonNull ObservableStorage<List<SummaryDto>> summaryStorage,
+            @NonNull WorkoutDatabase database
     ) {
         this.workoutDao = workoutDao;
-        this.workoutsMediator = workoutsMediator;
         this.context = context;
         this.workoutApi = workoutApi;
         this.summaryStorage = summaryStorage;
+        this.database = database;
     }
 
     @NonNull
     @Override
-    public Flowable<PagingData<Workout>> observeWorkouts() {
-        final var config = new PagingConfig(20, 5, true, 20);
-        final var pager = new Pager<>(config, 1, workoutsMediator, workoutDao::selectWorkouts);
-        final var executor = new Executor() {
-            @Override
-            public void execute(Runnable runnable) {
-                Schedulers.io().scheduleDirect(runnable);
-            }
-        };
-        final var workouts = PagingRx.getFlowable(pager);
+    public Flowable<List<Workout>> observeWorkouts() {
+        final var workouts = workoutDao.selectWorkouts();
         final var approaches = workoutDao.selectApproaches();
 
-        return Flowable.combineLatest(workouts, approaches, (workoutsPaging, approachList) ->
-                PagingDataTransforms.map(workoutsPaging, executor, (workout) -> {
-                    final var approachMap = ApproachEntity.associate(approachList);
-                    return workout.toDomain(approachMap);
-                })
-        ).subscribeOn(Schedulers.io());
+        return Flowable
+                .combineLatest(workouts, approaches, (workoutList, approachList) ->
+                        workoutList
+                                .stream()
+                                .map(workout -> {
+                                    final var approachMap = ApproachEntity.associate(approachList);
+                                    return workout.toDomain(approachMap);
+                                })
+                                .collect(Collectors.toList())
+                )
+                .doOnSubscribe((s) -> workoutApi
+                        .getWorkouts()
+                        .subscribe(
+                                workoutDtos -> insertWorkouts(
+                                        workoutDtos
+                                                .stream()
+                                                .map(WorkoutDto::toDomain)
+                                                .collect(Collectors.toList())
+                                ),
+                                e -> {}
+                        )
+                )
+                .subscribeOn(Schedulers.io());
     }
 
     @Override
@@ -208,7 +220,10 @@ public class WorkoutRepositoryImpl implements WorkoutRepository {
             @NonNull Map<String, List<Pair<Integer, Integer>>> approaches
     ) {
         final var workout = createDto(UUID.randomUUID().toString(), title, date, exercises, approaches);
-        return workoutApi.createWorkout(workout).subscribeOn(Schedulers.io());
+        return workoutApi
+                .createWorkout(workout)
+                .flatMapCompletable(dto -> insertWorkout(dto.toDomain()))
+                .subscribeOn(Schedulers.io());
     }
 
     @NonNull
@@ -221,7 +236,70 @@ public class WorkoutRepositoryImpl implements WorkoutRepository {
             @NonNull Map<String, List<Pair<Integer, Integer>>> approaches
     ) {
         final var workout = createDto(id, title, date, exercises, approaches);
-        return workoutApi.editWorkout(workout).subscribeOn(Schedulers.io());
+        return workoutApi
+                .editWorkout(workout)
+                .flatMapCompletable(dto -> insertWorkout(dto.toDomain()))
+                .subscribeOn(Schedulers.io());
+    }
+
+    private Completable insertWorkout(Workout workout) {
+        final var workoutEntity = new ArrayList<WorkoutEntity>(1);
+        workoutEntity.add(WorkoutEntity.toDb(workout));
+        final var exerciseEntities = new ArrayList<ExerciseEntity>(workout.exercises().size());
+        final var crossRefs = new ArrayList<WorkoutCrossRef>(workout.exercises().size());
+        final var approaches = new ArrayList<ApproachEntity>(workout.approaches().size());
+
+        workout.exercises().forEach(exercise -> {
+            exerciseEntities.add(ExerciseEntity.toDb(exercise));
+            crossRefs.add(new WorkoutCrossRef(workout.id(), exercise.id()));
+        });
+
+        workout.approaches().values().forEach(approachesList ->
+                approachesList
+                        .stream()
+                        .map(ApproachEntity::toDb)
+                        .forEach(approaches::add)
+        );
+
+        return workoutDao
+                .insertWorkouts(workoutEntity)
+                .andThen(workoutDao.insertExercises(exerciseEntities))
+                .andThen(workoutDao.insertCrossRef(crossRefs))
+                .andThen(workoutDao.insertApproaches(approaches))
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io());
+    }
+
+    private Completable insertWorkouts(List<Workout> workouts) {
+        final var workoutEntities = new ArrayList<WorkoutEntity>(workouts.size());
+        final var exerciseEntities = new ArrayList<ExerciseEntity>(workouts.size());
+        final var crossRefs = new ArrayList<WorkoutCrossRef>(workouts.size());
+        final var approaches = new ArrayList<ApproachEntity>(workouts.size());
+
+        workouts.forEach(workout -> {
+            workoutEntities.add(WorkoutEntity.toDb(workout));
+
+            workout.exercises().forEach(exercise -> {
+                exerciseEntities.add(ExerciseEntity.toDb(exercise));
+                crossRefs.add(new WorkoutCrossRef(workout.id(), exercise.id()));
+            });
+
+            workout.approaches().values().forEach(approachesList ->
+                    approachesList
+                            .stream()
+                            .map(ApproachEntity::toDb)
+                            .forEach(approaches::add)
+            );
+        });
+
+
+        return workoutDao
+                .insertWorkouts(workoutEntities)
+                .andThen(workoutDao.insertExercises(exerciseEntities))
+                .andThen(workoutDao.insertCrossRef(crossRefs))
+                .andThen(workoutDao.insertApproaches(approaches))
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io());
     }
 
     @NonNull
@@ -233,7 +311,8 @@ public class WorkoutRepositoryImpl implements WorkoutRepository {
                         workoutApi
                                 .getSummary()
                                 .subscribeOn(Schedulers.io())
-                                .subscribe(summaryStorage::save, e -> {})
+                                .subscribe(summaryStorage::save, e -> {
+                                })
                 )
                 .map(summaries ->
                         summaries
@@ -261,7 +340,9 @@ public class WorkoutRepositoryImpl implements WorkoutRepository {
                                     return workoutDao.insertExercises(entities);
                                 })
                                 .subscribeOn(Schedulers.io())
-                                .subscribe(() -> {}, e -> {})
+                                .subscribe(() -> {
+                                }, e -> {
+                                })
                 )
                 .map(exercises ->
                         exercises
