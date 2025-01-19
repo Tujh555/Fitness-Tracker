@@ -28,6 +28,9 @@ import com.github.terrakok.cicerone.androidx.FragmentScreen;
 
 import org.jetbrains.annotations.Contract;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class EditProfileFragment extends BaseFragment<EditProfileScreenState, EditProfileScreenAction, FragmentEditProfileBinding, EditProfileViewModel> {
     private static final String userKey = "user";
     private ActivityResultLauncher<PickVisualMediaRequest> pickImage;

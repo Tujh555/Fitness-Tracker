@@ -25,6 +25,9 @@ import com.github.terrakok.cicerone.androidx.FragmentScreen;
 
 import org.jetbrains.annotations.Contract;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class ExerciseAppendFragment extends BaseFragment<ExerciseAppendScreenState, ExerciseAppendScreenAction, FragmentExerciseEditBinding, ExerciseAppendViewModel> {
     private static final String existingExerciseKey = "exercise";
     private ActivityResultLauncher<PickVisualMediaRequest> pickImage;

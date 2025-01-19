@@ -29,6 +29,9 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class WorkoutAppendFragment
         extends BaseFragment<WorkoutAppendScreenState, WorkoutAppendScreenAction, FragmentWorkoutAppendBinding, WorkoutAppendViewModel>
         implements ApproachAppendDialog.PositiveClickListener, ExerciseSelectDialog.ExerciseSelectedListener {

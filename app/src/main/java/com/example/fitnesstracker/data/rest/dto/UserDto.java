@@ -12,12 +12,12 @@ import java.util.Objects;
 import java.util.UUID;
 
 public record UserDto(
-        @Nullable @SerializedName("id") Integer id,
-        @Nullable @SerializedName("name") String name,
-        @Nullable @SerializedName("login") String login,
-        @Nullable @SerializedName("age") Integer age,
-        @Nullable @SerializedName("avatar") String avatar,
-        @Nullable @SerializedName("target") String target
+        @SerializedName("id") Integer id,
+        @SerializedName("name") String name,
+        @SerializedName("login") String login,
+        @SerializedName("age") Integer age,
+        @SerializedName("avatar") String avatar,
+        @SerializedName("target") String target
 ) {
     @NonNull
     @Contract(" -> new")

@@ -17,6 +17,9 @@ import com.github.terrakok.cicerone.androidx.FragmentScreen;
 
 import org.jetbrains.annotations.Contract;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class ProfileViewFragment extends BaseFragment<User, ProfileViewAction, FragmentViewProfileBinding, ProfileViewModel> {
     @Override
     protected FragmentViewProfileBinding inflateBinding(

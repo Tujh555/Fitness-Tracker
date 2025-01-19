@@ -24,7 +24,10 @@ public class MainViewModel extends DisposableViewModel<MainFragmentState, MainPa
     private final @NonNull Router router;
 
     @Inject
-    public MainViewModel(WorkoutRepository repository, @NonNull Router router) {
+    public MainViewModel(
+            WorkoutRepository repository,
+            @NonNull Router router
+    ) {
         super(new MainFragmentState(null, new ArrayList<>()));
         this.repository = repository;
         this.router = router;

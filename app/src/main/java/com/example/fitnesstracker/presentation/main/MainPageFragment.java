@@ -28,6 +28,9 @@ import org.jetbrains.annotations.Contract;
 import java.util.ArrayList;
 import java.util.List;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class MainPageFragment extends BaseFragment<MainFragmentState, MainPageScreenAction, FragmentMainBinding, MainViewModel> {
     private WorkoutAdapter workoutAdapter;
 

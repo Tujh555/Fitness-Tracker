@@ -1,5 +1,7 @@
 package com.example.fitnesstracker.data.auth;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -79,13 +81,24 @@ public class AuthRepositoryImpl implements AuthRepository {
             @Nullable String name
     ) {
         final var registerRequest = new RegisterRequest(login, password, age, name);
+        Log.e("--tag", "singUp");
+        Log.d("--tag", login);
+        Log.d("--tag", password);
+        if (age != null) {
+            Log.d("--tag", age.toString());
+        }
+        if (name != null) {
+            Log.d("--tag", name);
+        }
 
         return authApi
                 .register(registerRequest)
                 .doOnSuccess(authResponse -> {
+                    Log.d("--tag", "resp " + authResponse);
                     tokenStorage.save(authResponse.authToken());
                     userStorage.save(authResponse.userDto());
                 })
+                .doOnError(Throwable::printStackTrace)
                 .map(response -> response.userDto().toDomain())
                 .subscribeOn(Schedulers.io());
     }

@@ -7,12 +7,12 @@ import retrofit2.http.POST;
 
 public interface AuthApi {
 
-    @POST("auth/login")
+    @POST("/auth/login")
     Single<AuthResponse> login(@Body LoginRequest request);
 
-    @POST("auth/register")
+    @POST("/auth/register")
     Single<AuthResponse> register(@Body RegisterRequest request);
 
-    @POST("auth/logout")
+    @POST("/auth/logout")
     Completable logout(@Body LogoutRequest request);
 }

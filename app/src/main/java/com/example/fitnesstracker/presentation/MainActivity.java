@@ -1,6 +1,8 @@
 package com.example.fitnesstracker.presentation;
 
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
 
 import androidx.activity.EdgeToEdge;
 import androidx.activity.OnBackPressedCallback;
@@ -16,6 +18,7 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.example.fitnesstracker.R;
 import com.example.fitnesstracker.databinding.ActivityMainBinding;
+import com.example.fitnesstracker.domain.profile.ProfileRepository;
 import com.example.fitnesstracker.presentation.auth.AuthFragment;
 import com.example.fitnesstracker.presentation.main.MainPageFragment;
 import com.example.fitnesstracker.presentation.profile.view.ProfileViewFragment;
@@ -30,6 +33,7 @@ import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
+import io.reactivex.rxjava3.disposables.Disposable;
 
 @AndroidEntryPoint
 public class MainActivity extends AppCompatActivity {
@@ -37,7 +41,10 @@ public class MainActivity extends AppCompatActivity {
     NavigatorHolder navigatorHolder;
     @Inject
     Router router;
+    @Inject
+    ProfileRepository repository;
     private Navigator navigator;
+    private @Nullable Disposable userObserve;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +59,15 @@ public class MainActivity extends AppCompatActivity {
         });
 
         navigator = new AnimatedAppNavigator(this, R.id.main_container);
+        binding.bottomNav.setVisibility(View.GONE);
+
+        userObserve = repository.observe().subscribe(
+                (user) -> {
+                    Log.e("--tag", "user " + user);
+                    binding.bottomNav.setVisibility(View.VISIBLE);
+                },
+                (e) -> {}
+        );
 
         binding.bottomNav.setOnItemSelectedListener(item -> {
             if (item.getItemId() == R.id.menu_home) {
@@ -87,6 +103,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         navigatorHolder.removeNavigator();
         super.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (userObserve != null && !userObserve.isDisposed()) {
+            userObserve.dispose();
+        }
+        super.onDestroy();
     }
 
     private static class AnimatedAppNavigator extends AppNavigator {

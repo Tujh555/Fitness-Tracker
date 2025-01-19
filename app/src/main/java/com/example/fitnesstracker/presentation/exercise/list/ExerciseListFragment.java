@@ -15,6 +15,9 @@ import com.example.fitnesstracker.presentation.exercise.list.components.Exercise
 
 import java.util.List;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class ExerciseListFragment extends BaseFragment<List<Exercise>, ExerciseListScreenAction, FragmentExerciseListBinding, ExerciseListViewModel> {
     private ExerciseListAdapter exerciseAdapter;
 
