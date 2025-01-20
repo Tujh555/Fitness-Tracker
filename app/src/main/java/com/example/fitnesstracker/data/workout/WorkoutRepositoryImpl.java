@@ -110,15 +110,13 @@ public class WorkoutRepositoryImpl implements WorkoutRepository {
     @NonNull
     public Completable putExerciseDescription(@NonNull String id, @Nullable Uri uri, @NonNull String title) {
         final Single<ExerciseDto> response;
+        final var titleBody = RequestBody.create(title, MediaType.get("text/plain"));
+        final var idBody = RequestBody.create(id, MediaType.get("text/plain"));
 
         if (uri != null) {
-            response = createMultipart(uri).flatMap(body -> {
-                final var titleBody = RequestBody.create(title, MediaType.get("text/plain"));
-                return workoutApi.putExercise(id, body, titleBody);
-            });
+            response = createMultipart(uri).flatMap(body -> workoutApi.putExercise(body, titleBody, idBody));
         } else {
-            final var titleBody = RequestBody.create(title, MediaType.get("text/plain"));
-            response = workoutApi.putExercise(id, null, titleBody);
+            response = workoutApi.putExercise(null, titleBody, idBody);
         }
 
         return response
@@ -148,15 +146,12 @@ public class WorkoutRepositoryImpl implements WorkoutRepository {
     @Override
     public Completable createExercise(@Nullable Uri uri, @NonNull String title) {
         final Single<ExerciseDto> response;
+        final var titleBody = RequestBody.create(title, MediaType.get("text/plain"));
 
         if (uri != null) {
-            response = createMultipart(uri).flatMap(body -> {
-                final var titleBody = RequestBody.create(title, MediaType.get("text/plain"));
-                return workoutApi.putExercise(null, body, titleBody);
-            });
+            response = createMultipart(uri).flatMap(body -> workoutApi.putExercise(body, titleBody, null));
         } else {
-            final var titleBody = RequestBody.create(title, MediaType.get("text/plain"));
-            response = workoutApi.putExercise(null, null, titleBody);
+            response = workoutApi.putExercise(null, titleBody, null);
         }
 
         return response
@@ -260,7 +255,7 @@ public class WorkoutRepositoryImpl implements WorkoutRepository {
                 .observeOn(Schedulers.io());
     }
 
-    private Completable insertWorkouts(List<Workout> workouts) {
+    private void insertWorkouts(List<Workout> workouts) {
         final var workoutEntities = new ArrayList<WorkoutEntity>(workouts.size());
         final var exerciseEntities = new ArrayList<ExerciseEntity>(workouts.size());
         final var crossRefs = new ArrayList<WorkoutCrossRef>(workouts.size());
@@ -283,13 +278,14 @@ public class WorkoutRepositoryImpl implements WorkoutRepository {
         });
 
 
-        return workoutDao
+        workoutDao
                 .insertWorkouts(workoutEntities)
                 .andThen(workoutDao.insertExercises(exerciseEntities))
                 .andThen(workoutDao.insertCrossRef(crossRefs))
                 .andThen(workoutDao.insertApproaches(approaches))
                 .subscribeOn(Schedulers.io())
-                .observeOn(Schedulers.io());
+                .observeOn(Schedulers.io())
+                .subscribe(() -> {}, (e) -> {});
     }
 
     @NonNull

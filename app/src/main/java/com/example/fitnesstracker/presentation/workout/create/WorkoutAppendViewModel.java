@@ -1,6 +1,7 @@
 package com.example.fitnesstracker.presentation.workout.create;
 
 import android.content.Context;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -117,31 +118,57 @@ public class WorkoutAppendViewModel extends DisposableViewModel<WorkoutAppendScr
     }
 
     private void appendExercise(@NonNull Exercise exercise, int repetitions, int weight) {
-        final var updatedExercises = stateSubject
+        stateSubject
                 .getValue()
                 .selectedExercises()
                 .stream()
-                .map(selectedPair -> {
-                    if (selectedPair.first().id().equals(exercise.id())) {
-                        final var approach = new Pair<>(repetitions, weight);
-                        final var approaches = selectedPair.second();
-                        approaches.add(approach);
-                        return new Pair<>(selectedPair.first(), approaches);
-                    }
+                .filter(selectedPair -> selectedPair.first().id().equals(exercise.id()))
+                .findFirst()
+                .ifPresentOrElse(
+                        (selectedPair) -> {
+                            final var approach = new Pair<>(repetitions, weight);
+                            final List<Pair<Integer, Integer>> approaches = new ArrayList<>(selectedPair.second());
+                            approaches.add(approach);
+                            List<Pair<Exercise, List<Pair<Integer, Integer>>>> upd = stateSubject
+                                    .getValue()
+                                    .selectedExercises()
+                                    .stream()
+                                    .map(p -> {
+                                        if (p.first().id().equals(selectedPair.first().id())) {
+                                            return new Pair<>(p.first(), approaches);
+                                        }
 
-                    return selectedPair;
-                })
-                .collect(Collectors.toList());
+                                        return selectedPair;
+                                    })
+                                    .collect(Collectors.toList());
 
-        updateState(state ->
-                new WorkoutAppendScreenState(
-                        state.existingId(),
-                        state.title(),
-                        state.date(),
-                        state.availableExercises(),
-                        updatedExercises
-                )
-        );
+                            updateState(state ->
+                                    new WorkoutAppendScreenState(
+                                            state.existingId(),
+                                            state.title(),
+                                            state.date(),
+                                            state.availableExercises(),
+                                            upd
+                                    )
+                            );
+                        },
+                        () -> {
+                            final var approach = new Pair<>(repetitions, weight);
+                            final var list = new ArrayList<Pair<Integer, Integer>>();
+                            list.add(approach);
+                            final var ex = new ArrayList<>(stateSubject.getValue().selectedExercises());
+                            ex.add(new Pair<>(exercise, list));
+                            updateState(state ->
+                                    new WorkoutAppendScreenState(
+                                            state.existingId(),
+                                            state.title(),
+                                            state.date(),
+                                            state.availableExercises(),
+                                            ex
+                                    )
+                            );
+                        }
+                );
     }
 
     private void save() {
@@ -186,9 +213,7 @@ public class WorkoutAppendViewModel extends DisposableViewModel<WorkoutAppendScr
                                 stateSubject.onNext(WorkoutAppendScreenState.empty);
                             }
                         },
-                        e -> Toast
-                                .makeText(context, "Ошибка", Toast.LENGTH_SHORT)
-                                .show(),
+                        e -> {},
                         disposables
                 );
     }

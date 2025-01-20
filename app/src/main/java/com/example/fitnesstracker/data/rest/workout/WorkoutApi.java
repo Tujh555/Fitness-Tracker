@@ -26,11 +26,11 @@ public interface WorkoutApi {
     Single<List<WorkoutDto>> getWorkouts();
 
     @Multipart
-    @POST("exercises/{id}")
+    @POST("exercises")
     Single<ExerciseDto> putExercise(
-            @Path("id") String id,
-            @Part("photo") MultipartBody.Part photo,
-            @Part("title") RequestBody title
+            @Part MultipartBody.Part photoBody,
+            @Part("title") RequestBody titleBody,
+            @Part("id") RequestBody idBody
     );
 
     @GET("summary")

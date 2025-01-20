@@ -16,6 +16,7 @@
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:hint="Логин"
         style="@style/ThemeOverlay.Material3.AutoCompleteTextView.OutlinedBox">
 
         <com.google.android.material.textfield.TextInputEditText
@@ -29,6 +30,7 @@
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:hint="Пароль"
         style="@style/ThemeOverlay.Material3.AutoCompleteTextView.OutlinedBox">
 
         <com.google.android.material.textfield.TextInputEditText

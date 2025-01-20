@@ -2,16 +2,19 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:padding="16dp">
 
     <ImageView
         android:id="@+id/iv_avatar"
+        android:layout_gravity="center_vertical"
         android:layout_width="100dp"
         android:layout_height="100dp"/>
 
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:hint="Имя"
         style="@style/ThemeOverlay.Material3.AutoCompleteTextView.OutlinedBox">
 
         <com.google.android.material.textfield.TextInputEditText
@@ -24,6 +27,7 @@
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:hint="Логин"
         style="@style/ThemeOverlay.Material3.AutoCompleteTextView.OutlinedBox">
 
         <com.google.android.material.textfield.TextInputEditText
@@ -36,6 +40,7 @@
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:hint="Возраст"
         style="@style/ThemeOverlay.Material3.AutoCompleteTextView.OutlinedBox">
 
         <com.google.android.material.textfield.TextInputEditText
@@ -48,6 +53,7 @@
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:hint="Цель"
         style="@style/ThemeOverlay.Material3.AutoCompleteTextView.OutlinedBox">
 
         <com.google.android.material.textfield.TextInputEditText
@@ -57,10 +63,11 @@
 
     </com.google.android.material.textfield.TextInputLayout>
 
-    <androidx.appcompat.widget.AppCompatButton
+    <Button
         android:id="@+id/btn_save"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
         android:text="Save"/>
 
 </LinearLayout>

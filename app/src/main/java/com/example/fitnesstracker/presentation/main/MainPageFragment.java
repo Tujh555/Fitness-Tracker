@@ -1,6 +1,7 @@
 package com.example.fitnesstracker.presentation.main;
 
 import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
@@ -63,6 +64,7 @@ public class MainPageFragment extends BaseFragment<MainFragmentState, MainPageSc
     protected void onStateChanged(@NonNull MainFragmentState state) {
         super.onStateChanged(state);
         final var workouts = state.workouts();
+        Log.d("--tag", "workouts " + workouts);
 
         if (workouts != null) {
             workoutAdapter.submitList(workouts);

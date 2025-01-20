@@ -1,8 +1,10 @@
 package com.example.fitnesstracker.presentation.main.components;
 
+import android.content.Context;
 import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -11,6 +13,7 @@ import com.bumptech.glide.Glide;
 import com.example.fitnesstracker.R;
 import com.example.fitnesstracker.databinding.ExerciseWithApproachesListItemBinding;
 import com.example.fitnesstracker.databinding.WorkoutListItemBinding;
+import com.example.fitnesstracker.domain.workout.models.Approach;
 import com.example.fitnesstracker.domain.workout.models.Workout;
 
 import java.time.ZoneId;
@@ -87,6 +90,13 @@ public class WorkoutViewHolder extends RecyclerView.ViewHolder {
 
             _binding.lvExercises.addView(exerciseBinding.getRoot());
         });
+    }
+
+    private static class ApproachAdapter extends ArrayAdapter<Approach> {
+
+        public ApproachAdapter(@NonNull Context context, int resource) {
+            super(context, resource);
+        }
     }
 
     @NonNull

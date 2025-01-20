@@ -1,6 +1,7 @@
 package com.example.fitnesstracker.presentation.workout.create.dialogs;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,6 +20,12 @@ import com.example.fitnesstracker.presentation.exercise.list.components.Exercise
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
+import dagger.hilt.android.lifecycle.HiltViewModel;
+
+@AndroidEntryPoint
 public class ExerciseSelectDialog extends DialogFragment {
     private @NonNull List<Exercise> exercises = new ArrayList<>();
     private ExerciseListAdapter adapter;
@@ -44,8 +51,11 @@ public class ExerciseSelectDialog extends DialogFragment {
             viewModel.exercises = exercises;
         }
         adapter = new ExerciseListAdapter(exercise -> {
+            Log.e("--tag", "Clicked, parent = " + getParentFragment().getClass());
             if (getParentFragment() instanceof ExerciseSelectedListener listener) {
+                Log.d("--tag", "listener " + listener);
                 listener.onSelected(exercise);
+                dismiss();
             }
         });
 
@@ -67,7 +77,11 @@ public class ExerciseSelectDialog extends DialogFragment {
         void onSelected(@NonNull Exercise exercise);
     }
 
-    private static class ExerciseSelectViewModel extends ViewModel {
+    @HiltViewModel
+    static class ExerciseSelectViewModel extends ViewModel {
+        @Inject
+        public ExerciseSelectViewModel() {}
+
         public List<Exercise> exercises = new ArrayList<>();
     }
 }

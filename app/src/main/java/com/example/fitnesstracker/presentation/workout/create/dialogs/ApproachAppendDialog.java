@@ -1,6 +1,7 @@
 package com.example.fitnesstracker.presentation.workout.create.dialogs;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -66,6 +67,7 @@ public class ApproachAppendDialog extends DialogFragment {
         if (binding == null) {
             return;
         }
+        Log.e("--tag", "CLICK");
 
         if (getParentFragment() instanceof PositiveClickListener listener) {
             int repetitions;
@@ -80,6 +82,7 @@ public class ApproachAppendDialog extends DialogFragment {
             }
 
             listener.addExercise(exercise, repetitions, weight);
+            dismiss();
         }
     }
 

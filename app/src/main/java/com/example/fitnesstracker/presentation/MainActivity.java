@@ -20,6 +20,7 @@ import com.example.fitnesstracker.R;
 import com.example.fitnesstracker.databinding.ActivityMainBinding;
 import com.example.fitnesstracker.domain.profile.ProfileRepository;
 import com.example.fitnesstracker.presentation.auth.AuthFragment;
+import com.example.fitnesstracker.presentation.exercise.list.ExerciseListFragment;
 import com.example.fitnesstracker.presentation.main.MainPageFragment;
 import com.example.fitnesstracker.presentation.profile.view.ProfileViewFragment;
 import com.example.fitnesstracker.presentation.workout.create.WorkoutAppendFragment;
@@ -82,6 +83,11 @@ public class MainActivity extends AppCompatActivity {
 
             if (item.getItemId() == R.id.menu_profile) {
                 router.newRootScreen(ProfileViewFragment.getScreen());
+                return true;
+            }
+
+            if (item.getItemId() == R.id.menu_exercise) {
+                router.newRootScreen(ExerciseListFragment.getScreen());
                 return true;
             }
 

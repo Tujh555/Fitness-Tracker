@@ -1,6 +1,7 @@
 package com.example.fitnesstracker.presentation.workout.create;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -79,7 +80,7 @@ public class WorkoutAppendFragment
 
         binding.btnAddExercise.setOnClickListener(v -> {
             final var dialog = new ExerciseSelectDialog(getViewModel().availableExercises());
-            dialog.show(getParentFragmentManager(), "");
+            dialog.show(getChildFragmentManager(), "");
         });
 
         binding.btnSave.setOnClickListener(v -> onAction(new WorkoutAppendScreenAction.Save()));
@@ -111,6 +112,7 @@ public class WorkoutAppendFragment
             }
 
             exerciseListAdapter.submitList(state.selectedExercises());
+            Log.e("--tag", "selected " + state.selectedExercises());
         });
     }
 
@@ -122,7 +124,7 @@ public class WorkoutAppendFragment
 
     private void showApproachDialog(@NonNull Exercise exercise) {
         final var editDialog = ApproachAppendDialog.create(exercise);
-        editDialog.show(getParentFragmentManager(), "");
+        editDialog.show(getChildFragmentManager(), "");
     }
 
     @NonNull
@@ -143,11 +145,14 @@ public class WorkoutAppendFragment
 
     @Override
     public void addExercise(@NonNull Exercise exercise, int repetitions, int weight) {
+        Log.d("--tag", "ex " + exercise);
+        Log.d("--tag", "rep " + repetitions + " w " + weight);
         onAction(new WorkoutAppendScreenAction.AppendExercise(exercise, repetitions, weight));
     }
 
     @Override
     public void onSelected(@NonNull Exercise exercise) {
+        Log.e("--tag", "exercise " + exercise);
         showApproachDialog(exercise);
     }
 }

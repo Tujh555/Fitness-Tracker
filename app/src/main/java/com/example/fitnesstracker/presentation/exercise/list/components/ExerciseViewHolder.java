@@ -24,14 +24,7 @@ public class ExerciseViewHolder extends RecyclerView.ViewHolder {
     }
 
     public void bind(@NonNull Exercise exercise, @NonNull Consumer<View> onClick) {
-        _binding.getRoot().setOnLongClickListener(view -> {
-            view.performHapticFeedback(
-                    HapticFeedbackConstants.LONG_PRESS,
-                    HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING
-            );
-            onClick.accept(view);
-            return true;
-        });
+        _binding.getRoot().setOnClickListener(onClick::accept);
 
         Glide.with(_binding.getRoot())
                 .load(exercise.describingPhoto())

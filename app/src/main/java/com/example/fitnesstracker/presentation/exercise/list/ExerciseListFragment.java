@@ -1,5 +1,6 @@
 package com.example.fitnesstracker.presentation.exercise.list;
 
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
@@ -12,6 +13,10 @@ import com.example.fitnesstracker.databinding.FragmentExerciseListBinding;
 import com.example.fitnesstracker.domain.workout.models.Exercise;
 import com.example.fitnesstracker.presentation.basic.fragment.BaseFragment;
 import com.example.fitnesstracker.presentation.exercise.list.components.ExerciseListAdapter;
+import com.example.fitnesstracker.presentation.profile.edit.EditProfileFragment;
+import com.github.terrakok.cicerone.androidx.FragmentScreen;
+
+import org.jetbrains.annotations.Contract;
 
 import java.util.List;
 
@@ -37,6 +42,7 @@ public class ExerciseListFragment extends BaseFragment<List<Exercise>, ExerciseL
 
         binding.rvExercises.setAdapter(exerciseAdapter);
         binding.rvExercises.setLayoutManager(layoutManager);
+        binding.btnCreate.setOnClickListener(v -> onAction(new ExerciseListScreenAction.Create()));
 
         return binding;
     }
@@ -51,5 +57,17 @@ public class ExerciseListFragment extends BaseFragment<List<Exercise>, ExerciseL
     @Override
     protected ExerciseListViewModel createViewModel() {
         return new ViewModelProvider(this).get(ExerciseListViewModel.class);
+    }
+
+    @NonNull
+    @Contract(" -> new")
+    public static FragmentScreen getScreen() {
+        return FragmentScreen
+                .Companion
+                .invoke(
+                        null,
+                        true,
+                        (f) -> new ExerciseListFragment()
+                );
     }
 }
