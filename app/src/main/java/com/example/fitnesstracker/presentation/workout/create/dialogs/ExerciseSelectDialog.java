@@ -51,9 +51,7 @@ public class ExerciseSelectDialog extends DialogFragment {
             viewModel.exercises = exercises;
         }
         adapter = new ExerciseListAdapter(exercise -> {
-            Log.e("--tag", "Clicked, parent = " + getParentFragment().getClass());
             if (getParentFragment() instanceof ExerciseSelectedListener listener) {
-                Log.d("--tag", "listener " + listener);
                 listener.onSelected(exercise);
                 dismiss();
             }

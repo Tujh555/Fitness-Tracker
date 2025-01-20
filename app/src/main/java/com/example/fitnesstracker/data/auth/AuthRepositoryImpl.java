@@ -1,7 +1,5 @@
 package com.example.fitnesstracker.data.auth;
 
-import android.util.Log;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -16,13 +14,10 @@ import com.example.fitnesstracker.domain.User;
 import com.example.fitnesstracker.domain.auth.AuthRepository;
 import com.example.fitnesstracker.domain.auth.error.NotExistedUserException;
 
-import java.nio.file.Path;
-
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import io.reactivex.rxjava3.core.Completable;
-import io.reactivex.rxjava3.core.Scheduler;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
@@ -81,20 +76,10 @@ public class AuthRepositoryImpl implements AuthRepository {
             @Nullable String name
     ) {
         final var registerRequest = new RegisterRequest(login, password, age, name);
-        Log.e("--tag", "singUp");
-        Log.d("--tag", login);
-        Log.d("--tag", password);
-        if (age != null) {
-            Log.d("--tag", age.toString());
-        }
-        if (name != null) {
-            Log.d("--tag", name);
-        }
 
         return authApi
                 .register(registerRequest)
                 .doOnSuccess(authResponse -> {
-                    Log.d("--tag", "resp " + authResponse);
                     tokenStorage.save(authResponse.authToken());
                     userStorage.save(authResponse.userDto());
                 })

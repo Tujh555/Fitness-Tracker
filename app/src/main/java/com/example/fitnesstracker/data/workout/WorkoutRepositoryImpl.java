@@ -297,8 +297,7 @@ public class WorkoutRepositoryImpl implements WorkoutRepository {
                         workoutApi
                                 .getSummary()
                                 .subscribeOn(Schedulers.io())
-                                .subscribe(summaryStorage::save, e -> {
-                                })
+                                .subscribe(summaryStorage::save, e -> {})
                 )
                 .map(summaries ->
                         summaries
@@ -306,8 +305,7 @@ public class WorkoutRepositoryImpl implements WorkoutRepository {
                                 .map(SummaryDto::toDomain)
                                 .collect(Collectors.toList())
                 )
-                .subscribeOn(Schedulers.io())
-                .distinct();
+                .subscribeOn(Schedulers.io());
     }
 
     @NonNull

@@ -37,7 +37,6 @@ public class AuthViewModel extends DisposableViewModel<AuthScreenState, AuthScre
         super(new AuthScreenState("", "", null));
         repository = authRepository;
         router = appRouter;
-        checkAlreadyAuthorized();
     }
 
     @Override
@@ -96,15 +95,5 @@ public class AuthViewModel extends DisposableViewModel<AuthScreenState, AuthScre
 
     private void signUp() {
         router.navigateTo(SingUpFragment.getScreen());
-    }
-
-    private void checkAlreadyAuthorized() {
-        onSubscribe(() ->
-                repository
-                        .getExisting()
-                        .doOnSuccess(this::navigateToMainPage)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-        );
     }
 }

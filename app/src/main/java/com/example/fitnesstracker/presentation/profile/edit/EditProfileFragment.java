@@ -45,7 +45,7 @@ public class EditProfileFragment extends BaseFragment<EditProfileScreenState, Ed
         if (getArguments() != null) {
             final var user = (User) getArguments().getSerializable(userKey);
             if (user != null) {
-                initViews(binding, user);
+                initViews(user);
             }
         }
 
@@ -93,6 +93,13 @@ public class EditProfileFragment extends BaseFragment<EditProfileScreenState, Ed
     protected void onStateChanged(@NonNull EditProfileScreenState state) {
         super.onStateChanged(state);
         withBinding(binding -> {
+            if (state.avatar() != null) {
+                Glide.with(this)
+                        .load(state.avatar())
+                        .centerCrop()
+                        .placeholder(R.drawable.ic_user)
+                        .into(binding.ivAvatar);
+            }
             updateEditText(binding.etAge, state.age());
             updateEditText(binding.etLogin, state.login());
             updateEditText(binding.etName, state.name());
@@ -106,23 +113,8 @@ public class EditProfileFragment extends BaseFragment<EditProfileScreenState, Ed
         return new ViewModelProvider(this).get(EditProfileViewModel.class);
     }
 
-    private void initViews(@NonNull FragmentEditProfileBinding binding, @NonNull User initialUser) {
-        if (initialUser.avatar() != null) {
-            Glide.with(this)
-                    .load(initialUser.avatar())
-                    .centerCrop()
-                    .placeholder(R.drawable.ic_user)
-                    .into(binding.ivAvatar);
-        }
-
-        binding.etName.setText(initialUser.name());
-        binding.etLogin.setText(initialUser.login());
-        if (initialUser.age() != null) {
-            binding.etAge.setText(initialUser.age().toString());
-        }
-        if (initialUser.target() != null) {
-            binding.etTarget.setText(initialUser.target());
-        }
+    private void initViews(@NonNull User initialUser) {
+        onAction(new EditProfileScreenAction.AppendExisting(initialUser));
     }
 
     private void updateEditText(@NonNull EditText editText, String text) {

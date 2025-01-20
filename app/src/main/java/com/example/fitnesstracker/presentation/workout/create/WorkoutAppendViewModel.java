@@ -52,7 +52,7 @@ public class WorkoutAppendViewModel extends DisposableViewModel<WorkoutAppendScr
     @Override
     public void onAction(@NonNull WorkoutAppendScreenAction action) {
         if (action instanceof WorkoutAppendScreenAction.Clear) {
-            stateSubject.onNext(WorkoutAppendScreenState.empty);
+            clear();
         } else if (action instanceof WorkoutAppendScreenAction.Save) {
             save();
         } else if (action instanceof WorkoutAppendScreenAction.Title title) {
@@ -171,6 +171,18 @@ public class WorkoutAppendViewModel extends DisposableViewModel<WorkoutAppendScr
                 );
     }
 
+    private void clear() {
+        updateState(s ->
+                new WorkoutAppendScreenState(
+                        null,
+                        "",
+                        null,
+                        s.availableExercises(),
+                        new ArrayList<>()
+                )
+        );
+    }
+
     private void save() {
         final var state = stateSubject.getValue();
         final var exercises = state
@@ -204,13 +216,16 @@ public class WorkoutAppendViewModel extends DisposableViewModel<WorkoutAppendScr
                 .subscribeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         () -> {
-                            Toast.makeText(context, "Тренировка отредактирована", Toast.LENGTH_SHORT)
-                                    .show();
-
                             if (state.existingId() != null) {
+                                Toast
+                                        .makeText(context, "Тренировка отредактирована", Toast.LENGTH_SHORT)
+                                        .show();
                                 router.exit();
                             } else {
-                                stateSubject.onNext(WorkoutAppendScreenState.empty);
+                                Toast
+                                        .makeText(context, "Тренировка добавлена", Toast.LENGTH_SHORT)
+                                        .show();
+                                clear();
                             }
                         },
                         e -> {},

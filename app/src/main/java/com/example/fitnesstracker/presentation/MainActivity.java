@@ -18,6 +18,7 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.example.fitnesstracker.R;
 import com.example.fitnesstracker.databinding.ActivityMainBinding;
+import com.example.fitnesstracker.domain.auth.AuthRepository;
 import com.example.fitnesstracker.domain.profile.ProfileRepository;
 import com.example.fitnesstracker.presentation.auth.AuthFragment;
 import com.example.fitnesstracker.presentation.exercise.list.ExerciseListFragment;
@@ -30,9 +31,12 @@ import com.github.terrakok.cicerone.Router;
 import com.github.terrakok.cicerone.androidx.AppNavigator;
 import com.github.terrakok.cicerone.androidx.FragmentScreen;
 
+import java.util.concurrent.TimeUnit;
+
 import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.disposables.Disposable;
 
@@ -44,8 +48,10 @@ public class MainActivity extends AppCompatActivity {
     Router router;
     @Inject
     ProfileRepository repository;
+    @Inject
+    AuthRepository authRepository;
     private Navigator navigator;
-    private @Nullable Disposable userObserve;
+    private final @NonNull CompositeDisposable disposables = new CompositeDisposable();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,13 +68,24 @@ public class MainActivity extends AppCompatActivity {
         navigator = new AnimatedAppNavigator(this, R.id.main_container);
         binding.bottomNav.setVisibility(View.GONE);
 
-        userObserve = repository.observe().subscribe(
-                (user) -> {
-                    Log.e("--tag", "user " + user);
-                    binding.bottomNav.setVisibility(View.VISIBLE);
-                },
-                (e) -> {}
+        repository.observe().subscribe(
+                (user) -> binding.bottomNav.setVisibility(View.VISIBLE),
+                (e) -> {},
+                () -> {},
+                disposables
         );
+
+        if (savedInstanceState == null) {
+            authRepository
+                    .getExisting()
+                    .timeout(200, TimeUnit.MILLISECONDS)
+                    .subscribeOn(AndroidSchedulers.mainThread())
+                    .subscribe(
+                            user -> router.newRootScreen(MainPageFragment.getScreen()),
+                            e -> router.newRootScreen(AuthFragment.getScreen()),
+                            disposables
+                    );
+        }
 
         binding.bottomNav.setOnItemSelectedListener(item -> {
             if (item.getItemId() == R.id.menu_home) {
@@ -93,10 +110,6 @@ public class MainActivity extends AppCompatActivity {
 
             return false;
         });
-
-        if (savedInstanceState == null) {
-            router.navigateTo(AuthFragment.getScreen());
-        }
     }
 
     @Override
@@ -113,8 +126,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        if (userObserve != null && !userObserve.isDisposed()) {
-            userObserve.dispose();
+        if (!disposables.isDisposed()) {
+            disposables.dispose();
         }
         super.onDestroy();
     }

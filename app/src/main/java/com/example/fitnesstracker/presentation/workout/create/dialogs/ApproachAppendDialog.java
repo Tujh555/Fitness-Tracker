@@ -67,7 +67,6 @@ public class ApproachAppendDialog extends DialogFragment {
         if (binding == null) {
             return;
         }
-        Log.e("--tag", "CLICK");
 
         if (getParentFragment() instanceof PositiveClickListener listener) {
             int repetitions;

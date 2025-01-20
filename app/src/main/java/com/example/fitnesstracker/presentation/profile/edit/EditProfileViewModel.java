@@ -49,7 +49,24 @@ public class EditProfileViewModel extends DisposableViewModel<EditProfileScreenS
             uploadPhoto(upload.uri());
         } else if (action instanceof EditProfileScreenAction.Save) {
             save();
+        } else if (action instanceof EditProfileScreenAction.AppendExisting appendExisting) {
+            appendExisting(appendExisting.user());
         }
+    }
+
+    private void appendExisting(@NonNull User user) {
+        updateState(state -> {
+            final var age = user.age() == null ? "" : user.age().toString();
+            final var target = user.target() == null ? "" : user.target();
+
+            return new EditProfileScreenState(
+                    user.avatar(),
+                    user.name(),
+                    user.login(),
+                    age,
+                    target
+            );
+        });
     }
 
     @SuppressLint("CheckResult")

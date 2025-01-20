@@ -1,6 +1,7 @@
 package com.example.fitnesstracker.data.workout;
 
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -34,6 +35,7 @@ public class SummaryStorage extends ObservableStorage<List<SummaryDto>> {
     @Inject
     public SummaryStorage(SharedPreferences preferences) {
         this.preferences = preferences;
+        preferences.registerOnSharedPreferenceChangeListener(this::onPrefsChanged);
     }
 
     @Override
@@ -46,7 +48,6 @@ public class SummaryStorage extends ObservableStorage<List<SummaryDto>> {
     @Override
     public List<SummaryDto> get() {
         final var json = preferences.getString(key, null);
-
         if (json == null) {
             return null;
         }
@@ -54,6 +55,7 @@ public class SummaryStorage extends ObservableStorage<List<SummaryDto>> {
         try {
             return gson.fromJson(json, listType);
         } catch (Exception e) {
+            e.printStackTrace();
             return null;
         }
     }
@@ -61,5 +63,12 @@ public class SummaryStorage extends ObservableStorage<List<SummaryDto>> {
     @Override
     public void clear() {
         preferences.edit().remove(key).apply();
+    }
+
+    private void onPrefsChanged(SharedPreferences preferences, String key) {
+        final var item = get();
+        if (item != null) {
+            update(item);
+        }
     }
 }

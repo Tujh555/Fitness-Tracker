@@ -112,7 +112,6 @@ public class WorkoutAppendFragment
             }
 
             exerciseListAdapter.submitList(state.selectedExercises());
-            Log.e("--tag", "selected " + state.selectedExercises());
         });
     }
 
@@ -145,14 +144,11 @@ public class WorkoutAppendFragment
 
     @Override
     public void addExercise(@NonNull Exercise exercise, int repetitions, int weight) {
-        Log.d("--tag", "ex " + exercise);
-        Log.d("--tag", "rep " + repetitions + " w " + weight);
         onAction(new WorkoutAppendScreenAction.AppendExercise(exercise, repetitions, weight));
     }
 
     @Override
     public void onSelected(@NonNull Exercise exercise) {
-        Log.e("--tag", "exercise " + exercise);
         showApproachDialog(exercise);
     }
 }

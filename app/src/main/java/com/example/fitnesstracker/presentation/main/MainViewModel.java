@@ -1,7 +1,8 @@
 package com.example.fitnesstracker.presentation.main;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
-import androidx.paging.PagingData;
 
 import com.example.fitnesstracker.domain.workout.WorkoutRepository;
 import com.example.fitnesstracker.domain.workout.models.Workout;
@@ -32,10 +33,22 @@ public class MainViewModel extends DisposableViewModel<MainFragmentState, MainPa
         this.repository = repository;
         this.router = router;
         observePagingSource();
+        observeSummary();
     }
 
     private void observePagingSource() {
         onSubscribe(() -> repository.observeWorkouts().doOnNext(this::updatePagingData));
+    }
+
+    private void observeSummary() {
+        onSubscribe(() ->
+                repository
+                        .observeSummary()
+                        .doOnNext(s -> Log.d("--tag", "vm summary " + s))
+                        .doOnNext(summaries ->
+                                updateState(state -> new MainFragmentState(state.workouts(), summaries))
+                        )
+        );
     }
 
     @Override
